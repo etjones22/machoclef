@@ -92,7 +92,7 @@ public class GetToOuterEndIslandsTask extends Task {
     @Override
     public boolean isFinished(AltoClef mod) {
         return WorldHelper.getCurrentDimension() == Dimension.END &&
-                !WorldHelper.inRangeXZ(new Vec3d(0, 64, 0), mod.getPlayer().getPos(), END_ISLAND_START_RADIUS);
+                !WorldHelper.inRangeXZ(new Vec3d(0, 64, 0), mod.getPlayer().getEntityPos(), END_ISLAND_START_RADIUS);
     }
 
     @Override

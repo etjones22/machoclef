@@ -37,7 +37,7 @@ public class EntityHelper {
         ClientPlayerEntity player = MinecraftClient.getInstance().player;
         // NOTE: These do not work.
         if (hostile instanceof EndermanEntity enderman) {
-            return enderman.isAngryAt(player) && enderman.isAngry();
+            return enderman.isAngry();
         }
         if (hostile instanceof PiglinEntity) {
             // Angry if we're not wearing gold
@@ -45,18 +45,17 @@ public class EntityHelper {
         }
         if (hostile instanceof ZombifiedPiglinEntity zombie) {
             // Will ALWAYS be false.
-            return zombie.hasAngerTime() && zombie.isAngryAt(player);
+            return zombie.hasAngerTime();
         }
         return !isTradingPiglin(hostile);
     }
 
     public static boolean isTradingPiglin(Entity entity) {
         if (entity instanceof PiglinEntity pig) {
-            for (ItemStack stack : pig.getItemsHand()) {
-                if (stack.getItem().equals(Items.GOLD_INGOT)) {
-                    // We're trading with this one, ignore it.
-                    return true;
-                }
+            ItemStack stack = pig.getMainHandStack();
+            if (stack.getItem().equals(Items.GOLD_INGOT)) {
+                // We're trading with this one, ignore it.
+                return true;
             }
         }
         return false;
@@ -69,37 +68,7 @@ public class EntityHelper {
     public static double calculateResultingPlayerDamage(PlayerEntity player, DamageSource source, double damageAmount) {
         // Copied logic from `PlayerEntity.applyDamage`
 
-        if (player.isInvulnerableTo(source))
-            return 0;
-
-        // Armor Base
-        if (!source.bypassesArmor()) {
-            damageAmount = DamageUtil.getDamageLeft((float) damageAmount, (float) player.getArmor(), (float) player.getAttributeValue(EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
-        }
-
-        // Enchantments & Potions
-        if (!source.isUnblockable()) {
-            int k;
-            if (player.hasStatusEffect(StatusEffects.RESISTANCE) && source != DamageSource.OUT_OF_WORLD) {
-                //noinspection ConstantConditions
-                k = (player.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier() + 1) * 5;
-                int j = 25 - k;
-                double f = damageAmount * (double)j;
-                double g = damageAmount;
-                damageAmount = Math.max(f / 25.0F, 0.0F);
-            }
-
-            if (damageAmount <= 0.0) {
-                damageAmount = 0.0;
-            } else {
-                k = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), source);
-                if (k > 0) {
-                    damageAmount = DamageUtil.getInflictedDamage((float)damageAmount, (float)k);
-                }
-            }
-        }
-
-        // Absorption
+        if (player.isCreative()) return 0;
         damageAmount = Math.max(damageAmount - player.getAbsorptionAmount(), 0.0F);
         return damageAmount;
     }

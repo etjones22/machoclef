@@ -15,8 +15,10 @@ import net.minecraft.client.gui.screen.GameMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.GameOptionsScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.*;
+import net.minecraft.recipe.NetworkRecipeId;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.screen.*;
 import org.apache.commons.lang3.ArrayUtils;
@@ -59,15 +61,15 @@ public class StorageHelper {
         PlayerInventory inv = player.getInventory();
         if (inv != null) {
             if (slot.equals(PlayerSlot.OFFHAND_SLOT))
-                return inv.offHand.stream().findFirst().orElse(ItemStack.EMPTY).copy();
+                return player.getEquippedStack(net.minecraft.entity.EquipmentSlot.OFFHAND).copy();
             if (slot.equals(PlayerSlot.ARMOR_HELMET_SLOT))
-                return inv.getArmorStack(3).copy();
+                return player.getEquippedStack(EquipmentSlot.HEAD).copy();
             if (slot.equals(PlayerSlot.ARMOR_CHESTPLATE_SLOT))
-                return inv.getArmorStack(2).copy();
+                return player.getEquippedStack(EquipmentSlot.CHEST).copy();
             if (slot.equals(PlayerSlot.ARMOR_LEGGINGS_SLOT))
-                return inv.getArmorStack(1).copy();
+                return player.getEquippedStack(EquipmentSlot.LEGS).copy();
             if (slot.equals(PlayerSlot.ARMOR_BOOTS_SLOT))
-                return inv.getArmorStack(0).copy();
+                return player.getEquippedStack(EquipmentSlot.FEET).copy();
         }
         try {
             // We might have messed up and opened the wrong slot.
@@ -134,8 +136,8 @@ public class StorageHelper {
             if (!slot.isSlotInPlayerInventory())
                 continue;
             ItemStack stack = getItemStackInSlot(slot);
-            if (stack.getItem() instanceof ToolItem) {
-                if (stack.getItem().isSuitableFor(state)) {
+            if (ItemHelper.isTool(stack.getItem())) {
+                if (stack.isSuitableFor(state)) {
                     double speed = ToolSet.calculateSpeedVsBlock(stack, state);
                     if (speed > highestSpeed) {
                         highestSpeed = speed;
@@ -152,6 +154,16 @@ public class StorageHelper {
             }
         }
         return Optional.ofNullable(bestToolSlot);
+    }
+
+    private static int getToolTier(Item item) {
+        if (ArrayUtils.contains(ItemHelper.NETHERITE_TOOLS, item)) return 5;
+        if (ArrayUtils.contains(ItemHelper.DIAMOND_TOOLS, item)) return 4;
+        if (ArrayUtils.contains(ItemHelper.IRON_TOOLS, item)) return 3;
+        if (ArrayUtils.contains(ItemHelper.STONE_TOOLS, item)) return 2;
+        if (ArrayUtils.contains(ItemHelper.WOODEN_TOOLS, item)) return 1;
+        if (ArrayUtils.contains(ItemHelper.GOLDEN_TOOLS, item)) return 1;
+        return 0;
     }
 
     // Gets a slot with an item we can throw away
@@ -186,9 +198,9 @@ public class StorageHelper {
             if (!ItemHelper.canThrowAwayStack(mod, stack))
                 continue;
             Item item = stack.getItem();
-            if (item instanceof ToolItem tool) {
-                Class c = tool.getClass();
-                int level = tool.getMaterial().getMiningLevel();
+            if (ItemHelper.isTool(item)) {
+                Class c = item.getClass();
+                int level = getToolTier(item);
                 int prevBest = bestMaterials.getOrDefault(c, 0);
                 if (level > prevBest) {
                     // We had a WORSE tool before.
@@ -224,8 +236,8 @@ public class StorageHelper {
                 if (ItemHelper.canThrowAwayStack(mod, stack)) {
                     possibleSlots.add(slot);
                 }
-                if (stack.getItem().isFood()) {
-                    calcTotalFoodScore += Objects.requireNonNull(stack.getItem().getFoodComponent()).getHunger();
+                if (ItemHelper.isFood(stack)) {
+                    calcTotalFoodScore += ItemHelper.getFoodHunger(stack);
                 }
             }
 
@@ -235,8 +247,8 @@ public class StorageHelper {
                 return possibleSlots.stream().min((leftSlot, rightSlot) -> {
                     ItemStack left = StorageHelper.getItemStackInSlot(leftSlot),
                             right = StorageHelper.getItemStackInSlot(rightSlot);
-                    boolean leftIsTool = left.getItem() instanceof ToolItem;
-                    boolean rightIsTool = right.getItem() instanceof ToolItem;
+                    boolean leftIsTool = ItemHelper.isTool(left.getItem());
+                    boolean rightIsTool = ItemHelper.isTool(right.getItem());
                     // Prioritize tools over materials.
                     if (rightIsTool && !leftIsTool) {
                         return -1;
@@ -245,10 +257,10 @@ public class StorageHelper {
                     }
                     if (rightIsTool && leftIsTool) {
                         // Prioritize material type, then durability.
-                        ToolItem leftTool = (ToolItem) left.getItem();
-                        ToolItem rightTool = (ToolItem) right.getItem();
-                        if (leftTool.getMaterial().getMiningLevel() != rightTool.getMaterial().getMiningLevel()) {
-                            return leftTool.getMaterial().getMiningLevel() - rightTool.getMaterial().getMiningLevel();
+                        int leftTier = getToolTier(left.getItem());
+                        int rightTier = getToolTier(right.getItem());
+                        if (leftTier != rightTier) {
+                            return leftTier - rightTier;
                         }
                         // We want less damage.
                         return left.getDamage() - right.getDamage();
@@ -256,8 +268,8 @@ public class StorageHelper {
 
                     // Prioritize food over other things if we lack food.
                     boolean lacksFood = totalFoodScore < 8;
-                    boolean leftIsFood = left.getItem().isFood() && left.getItem() != Items.SPIDER_EYE;
-                    boolean rightIsFood = right.getItem().isFood() && right.getItem() != Items.SPIDER_EYE;
+                    boolean leftIsFood = ItemHelper.isFood(left) && left.getItem() != Items.SPIDER_EYE;
+                    boolean rightIsFood = ItemHelper.isFood(right) && right.getItem() != Items.SPIDER_EYE;
                     if (lacksFood) {
                         if (rightIsFood && !leftIsFood) {
                             return -1;
@@ -267,10 +279,8 @@ public class StorageHelper {
                     }
                     // If both are food, pick the better cost.
                     if (leftIsFood && rightIsFood) {
-                        assert left.getItem().getFoodComponent() != null;
-                        assert right.getItem().getFoodComponent() != null;
-                        int leftCost = left.getItem().getFoodComponent().getHunger() * left.getCount(),
-                                rightCost = right.getItem().getFoodComponent().getHunger() * right.getCount();
+                        int leftCost = ItemHelper.getFoodHunger(left) * left.getCount(),
+                                rightCost = ItemHelper.getFoodHunger(right) * right.getCount();
                         return -1 * (leftCost - rightCost);
                     }
 
@@ -314,8 +324,8 @@ public class StorageHelper {
 
     public static boolean isArmorEquipped(AltoClef mod, Item ...any) {
         for (Item item : any) {
-            if (item instanceof ArmorItem armor) {
-                ItemStack equippedStack = mod.getPlayer().getInventory().getArmorStack(armor.getSlotType().getEntitySlotId());
+            if (ItemHelper.isArmor(item) && ItemHelper.getEquipmentSlot(item) != null) {
+                ItemStack equippedStack = mod.getPlayer().getEquippedStack(ItemHelper.getEquipmentSlot(item));
                 if (equippedStack.getItem().equals(item))
                     return true;
             }
@@ -356,8 +366,8 @@ public class StorageHelper {
     public static int calculateInventoryFoodScore(AltoClef mod) {
         int result = 0;
         for (ItemStack stack : mod.getItemStorage().getItemStacksPlayerInventory(true)) {
-            if (stack.isFood())
-                result += Objects.requireNonNull(stack.getItem().getFoodComponent()).getHunger() * stack.getCount();
+            if (ItemHelper.isFood(stack))
+                result += ItemHelper.getFoodHunger(stack) * stack.getCount();
         }
         return result;
     }
@@ -537,7 +547,7 @@ public class StorageHelper {
     }
 
     public static void instantFillRecipeViaBook(AltoClef mod, CraftingRecipe recipe, Item output, boolean craftAll) {
-        Optional<Recipe> recipeToSend = JankCraftingRecipeMapping.getMinecraftMappedRecipe(recipe, output);
+        Optional<NetworkRecipeId> recipeToSend = JankCraftingRecipeMapping.getMinecraftMappedRecipe(recipe, output);
         if (recipeToSend.isPresent()) {
             mod.getController().clickRecipe(MinecraftClient.getInstance().player.currentScreenHandler.syncId, recipeToSend.get(), craftAll);
         } else {

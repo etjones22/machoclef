@@ -75,7 +75,7 @@ public class MessageSender {
             Debug.logError("Failed to send chat message as no client loaded.");
             return;
         }
-        MinecraftClient.getInstance().player.sendChatMessage(message);
+        MinecraftClient.getInstance().getNetworkHandler().sendChatMessage(message);
     }
 
     private static abstract class BaseMessage {

@@ -32,7 +32,7 @@ public class FollowPlayerTask extends Task {
         }
         Vec3d target = lastPos.get();
 
-        if (target.isInRange(mod.getPlayer().getPos(), 1) && !mod.getEntityTracker().isPlayerLoaded(_playerName)) {
+        if (target.isInRange(mod.getPlayer().getEntityPos(), 1) && !mod.getEntityTracker().isPlayerLoaded(_playerName)) {
             mod.logWarning("Failed to get to player \"" + _playerName + "\". We moved to where we last saw them but now have no idea where they are.");
             stop(mod);
             return null;

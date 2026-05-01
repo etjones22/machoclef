@@ -14,6 +14,7 @@ import adris.altoclef.util.slots.PlayerSlot;
 import adris.altoclef.util.time.TimerGame;
 import adris.altoclef.util.helpers.StorageHelper;
 import adris.altoclef.util.helpers.WorldHelper;
+import adris.altoclef.util.helpers.ItemHelper;
 import adris.altoclef.util.progresscheck.MovementProgressChecker;
 import adris.altoclef.util.slots.CursorSlot;
 import net.minecraft.block.Block;
@@ -22,7 +23,6 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.MiningToolItem;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -132,13 +132,12 @@ public class MineAndCollectTask extends ResourceTask {
             if (cursorStack != null && !cursorStack.isEmpty()) {
                 // We have something in our cursor stack
                 Item item = cursorStack.getItem();
-                if (item.isSuitableFor(mod.getWorld().getBlockState(_subtask.miningPos()))) {
+                if (cursorStack.isSuitableFor(mod.getWorld().getBlockState(_subtask.miningPos()))) {
                     // Our cursor stack would help us mine our current block
                     Item currentlyEquipped = StorageHelper.getItemStackInSlot(PlayerSlot.getEquipSlot()).getItem();
-                    if (item instanceof MiningToolItem) {
-                        if (currentlyEquipped instanceof MiningToolItem currentPick) {
-                            MiningToolItem swapPick = (MiningToolItem) item;
-                            if (swapPick.getMaterial().getMiningLevel() > currentPick.getMaterial().getMiningLevel()) {
+                    if (ItemHelper.isTool(item)) {
+                        if (ItemHelper.isTool(currentlyEquipped)) {
+                            if (getPickaxeTier(item) > getPickaxeTier(currentlyEquipped)) {
                                 // We can equip a better pickaxe.
                                 mod.getSlotHandler().forceEquipSlot(CursorSlot.SLOT);
                             }
@@ -151,6 +150,16 @@ public class MineAndCollectTask extends ResourceTask {
             }
             _cursorStackTimer.reset();
         }
+    }
+
+    private static int getPickaxeTier(Item item) {
+        if (item == Items.NETHERITE_PICKAXE) return 5;
+        if (item == Items.DIAMOND_PICKAXE) return 4;
+        if (item == Items.IRON_PICKAXE) return 3;
+        if (item == Items.STONE_PICKAXE) return 2;
+        if (item == Items.WOODEN_PICKAXE) return 1;
+        if (item == Items.GOLDEN_PICKAXE) return 1;
+        return 0;
     }
 
     private static class MineOrCollectTask extends AbstractDoToClosestObjectTask<Object> {
@@ -175,7 +184,7 @@ public class MineAndCollectTask extends ResourceTask {
                 return WorldHelper.toVec3d(b);
             }
             if (obj instanceof ItemEntity item) {
-                return item.getPos();
+                return item.getEntityPos();
             }
             throw new UnsupportedOperationException("Shouldn't try to get the position of object " + obj + " of type " + (obj != null ? obj.getClass().toString() : "(null object)"));
         }
@@ -209,7 +218,7 @@ public class MineAndCollectTask extends ResourceTask {
 
         @Override
         protected Vec3d getOriginPos(AltoClef mod) {
-            return mod.getPlayer().getPos();
+            return mod.getPlayer().getEntityPos();
         }
 
         @Override

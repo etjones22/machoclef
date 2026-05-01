@@ -3,6 +3,7 @@ package adris.altoclef.util;
 import adris.altoclef.Debug;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 public enum MiningRequirement implements Comparable<MiningRequirement> {
@@ -19,7 +20,7 @@ public enum MiningRequirement implements Comparable<MiningRequirement> {
             for (MiningRequirement req : MiningRequirement.values()) {
                 if (req == MiningRequirement.HAND) continue;
                 Item pick = req.getMinimumPickaxe();
-                if (pick.isSuitableFor(block.getDefaultState())) {
+                if (new ItemStack(pick).isSuitableFor(block.getDefaultState())) {
                     return req;
                 }
             }

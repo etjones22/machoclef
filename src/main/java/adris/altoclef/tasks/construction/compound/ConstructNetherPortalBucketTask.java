@@ -117,7 +117,7 @@ public class ConstructNetherPortalBucketTask extends Task {
         }
 
         //If too far, reset.
-        if (_portalOrigin != null && !_portalOrigin.isWithinDistance(mod.getPlayer().getPos(), 2000)) {
+        if (_portalOrigin != null && !_portalOrigin.isWithinDistance(mod.getPlayer().getEntityPos(), 2000)) {
             _portalOrigin = null;
             _currentDestroyTarget = null;
         }

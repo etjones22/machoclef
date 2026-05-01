@@ -111,7 +111,7 @@ public class PlaceBedAndSetSpawnTask extends Task {
         _wasSleeping = false;
 
         _respawnPointSetMessageCheck = EventBus.subscribe(ChatMessageEvent.class, evt -> {
-            String msg = evt.message.asString();
+            String msg = evt.message.getString();
             if (msg.contains("Respawn point set")) {
                 _spawnSet = true;
                 _inBedTimer.reset();
@@ -175,7 +175,7 @@ public class PlaceBedAndSetSpawnTask extends Task {
             // Sleep in the nearest bed
             setDebugState("Going to bed to sleep...");
             return new DoToClosestBlockTask(toSleepIn -> {
-                boolean closeEnough = toSleepIn.isWithinDistance(mod.getPlayer().getPos(), 3);
+                boolean closeEnough = toSleepIn.isWithinDistance(mod.getPlayer().getEntityPos(), 3);
                 if (closeEnough) {
                     // why 0.2? I'm tired.
                     Vec3d centerBed = new Vec3d(toSleepIn.getX() + 0.5, toSleepIn.getY() + 0.2, toSleepIn.getZ() + 0.5);
@@ -354,7 +354,7 @@ public class PlaceBedAndSetSpawnTask extends Task {
                 for (int dy = origin.getY() - SCAN_RANGE; dy < origin.getY() + SCAN_RANGE; ++dy) {
                     // Test range
                     BlockPos attemptStandPos = new BlockPos(dx, dy, dz);
-                    double distance = attemptStandPos.getSquaredDistance(mod.getPlayer().getPos());
+                    double distance = attemptStandPos.getSquaredDistance(mod.getPlayer().getEntityPos());
                     if (distance > closestDist) continue;
                     // Everything from here on out is checking for a BETTER pos.
                     for (int checkX = 0; checkX < BED_CLEAR_SIZE.getX(); ++checkX) {

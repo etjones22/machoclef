@@ -68,7 +68,7 @@ public class CollectHoneycombTask extends ResourceTask {
             return new CataloguedResourceTask(new ItemTarget(Items.SHEARS, 1));
         }
         if (mod.getWorld().getBlockState(_nest).get(Properties.HONEY_LEVEL) != 5) {
-            if (!_nest.isWithinDistance(mod.getPlayer().getPos(), 20)) {
+            if (!_nest.isWithinDistance(mod.getPlayer().getEntityPos(), 20)) {
                 setDebugState("Getting close to nest");
                 return new GetCloseToBlockTask(_nest);
             }

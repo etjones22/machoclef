@@ -42,7 +42,7 @@ public class ExampleTask2 extends Task {
         }
 
         if (mod.getBlockTracker().anyFound(Blocks.OAK_LOG)) {
-            Optional<BlockPos> nearest = mod.getBlockTracker().getNearestTracking(mod.getPlayer().getPos(), Blocks.OAK_LOG);
+            Optional<BlockPos> nearest = mod.getBlockTracker().getNearestTracking(mod.getPlayer().getEntityPos(), Blocks.OAK_LOG);
             if (nearest.isPresent()) {
                 // Figure out leaves
                 BlockPos check = new BlockPos(nearest.get());

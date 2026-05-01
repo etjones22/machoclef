@@ -47,7 +47,7 @@ public class DoToClosestEntityTask extends AbstractDoToClosestObjectTask<Entity>
 
     @Override
     protected Vec3d getPos(AltoClef mod, Entity obj) {
-        return obj.getPos();
+        return obj.getEntityPos();
     }
 
     @Override
@@ -61,7 +61,7 @@ public class DoToClosestEntityTask extends AbstractDoToClosestObjectTask<Entity>
         if (_getOriginPos != null) {
             return _getOriginPos.get();
         }
-        return mod.getPlayer().getPos();
+        return mod.getPlayer().getEntityPos();
     }
 
     @Override

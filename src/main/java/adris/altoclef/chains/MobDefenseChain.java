@@ -13,6 +13,7 @@ import adris.altoclef.util.helpers.BaritoneHelper;
 import adris.altoclef.util.baritone.CachedProjectile;
 import adris.altoclef.util.time.TimerGame;
 import adris.altoclef.util.helpers.EntityHelper;
+import adris.altoclef.util.helpers.ItemHelper;
 import adris.altoclef.util.helpers.LookHelper;
 import adris.altoclef.util.helpers.ProjectileHelper;
 import baritone.Baritone;
@@ -30,7 +31,6 @@ import net.minecraft.entity.projectile.DragonFireballEntity;
 import net.minecraft.entity.projectile.FireballEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.item.ToolItem;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -63,11 +63,21 @@ public class MobDefenseChain extends SingleTaskChain {
 
     public static double getCreeperSafety(Vec3d pos, CreeperEntity creeper) {
         double distance = creeper.squaredDistanceTo(pos);
-        float fuse = creeper.getClientFuseTime(1);
+        float fuse = creeper.getLerpedFuseTime(1);
 
         // Not fusing.
         if (fuse <= 0.001f) return distance;
         return distance * 0.2; // less is WORSE
+    }
+
+    private static float getSwordDamage(Item sword) {
+        if (sword == Items.NETHERITE_SWORD) return 9;
+        if (sword == Items.DIAMOND_SWORD) return 8;
+        if (sword == Items.IRON_SWORD) return 7;
+        if (sword == Items.STONE_SWORD) return 6;
+        if (sword == Items.GOLDEN_SWORD) return 5;
+        if (sword == Items.WOODEN_SWORD) return 5;
+        return ItemHelper.isTool(sword) ? 1 : 0;
     }
 
     @Override
@@ -130,7 +140,7 @@ public class MobDefenseChain extends SingleTaskChain {
             //Debug.logMessage("RUNNING AWAY!");
             _runAwayTask = new RunAwayFromCreepersTask(CREEPER_KEEP_DISTANCE);
             setTask(_runAwayTask);
-            return 50 + blowingUp.getClientFuseTime(1) * 50;
+            return 50 + blowingUp.getLerpedFuseTime(1) * 50;
         }
 
         // Dodge projectiles
@@ -160,11 +170,11 @@ public class MobDefenseChain extends SingleTaskChain {
                 hostiles = mod.getEntityTracker().getHostiles();//mod.getEntityTracker().getTrackedEntities(SkeletonEntity.class;
             }
 
-            ToolItem bestSword = null;
+            Item bestSword = null;
             Item[] SWORDS = new Item[]{Items.NETHERITE_SWORD, Items.DIAMOND_SWORD, Items.IRON_SWORD, Items.GOLDEN_SWORD, Items.STONE_SWORD, Items.WOODEN_SWORD};
             for (Item item : SWORDS) {
                 if (mod.getItemStorage().hasItem(item)) {
-                    bestSword = (ToolItem) item;
+                    bestSword = item;
                     break;
                 }
             }
@@ -228,7 +238,7 @@ public class MobDefenseChain extends SingleTaskChain {
                     // full diamond has 8 bonus toughness
                     // full netherite has 12 bonus toughness
                     int armor = mod.getPlayer().getArmor();
-                    float damage = bestSword == null ? 0 : (1 + bestSword.getMaterial().getAttackDamage());
+                    float damage = bestSword == null ? 0 : getSwordDamage(bestSword);
 
                     int canDealWith = (int) Math.ceil((armor * 3.6 / 20.0) + (damage * 0.8));
 
@@ -353,11 +363,11 @@ public class MobDefenseChain extends SingleTaskChain {
             for (CreeperEntity creeper : creepers) {
 
                 if (creeper == null) continue;
-                if (creeper.getClientFuseTime(1) < 0.001) continue;
+                if (creeper.getLerpedFuseTime(1) < 0.001) continue;
 
                 // We want to pick the closest creeper, but FIRST pick creepers about to blow
                 // At max fuse, the cost goes to basically zero.
-                double safety = getCreeperSafety(mod.getPlayer().getPos(), creeper);
+                double safety = getCreeperSafety(mod.getPlayer().getEntityPos(), creeper);
                 if (safety < worstSafety) {
                     target = creeper;
                 }
@@ -388,7 +398,7 @@ public class MobDefenseChain extends SingleTaskChain {
 
                 Vec3d expectedHit = ProjectileHelper.calculateArrowClosestApproach(projectile, mod.getPlayer());
 
-                Vec3d delta = mod.getPlayer().getPos().subtract(expectedHit);
+                Vec3d delta = mod.getPlayer().getEntityPos().subtract(expectedHit);
 
                 //Debug.logMessage("EXPECTED HIT OFFSET: " + delta + " ( " + projectile.gravity + ")");
 
@@ -408,7 +418,7 @@ public class MobDefenseChain extends SingleTaskChain {
         // Wither skeletons are dangerous because of the wither effect. Oof kinda obvious.
         // If we merely force field them, we will run into them and get the wither effect which will kill us.
         if (mod.getEntityTracker().entityFound(WitherSkeletonEntity.class)) {
-            Optional<Entity> entity = mod.getEntityTracker().getClosestEntity(mod.getPlayer().getPos(), WitherSkeletonEntity.class);
+            Optional<Entity> entity = mod.getEntityTracker().getClosestEntity(mod.getPlayer().getEntityPos(), WitherSkeletonEntity.class);
             if (entity.isPresent()) {
                 double range = SAFE_KEEP_DISTANCE - 2;
                 if (entity.get().squaredDistanceTo(mod.getPlayer()) < range * range && EntityHelper.isAngryAtPlayer(mod, entity.get())) {
@@ -420,7 +430,7 @@ public class MobDefenseChain extends SingleTaskChain {
         // If we merely force field them and stand still our health will slowly be chipped away until we die
         if (mod.getEntityTracker().entityFound(HoglinEntity.class, ZoglinEntity.class)) {
             if (mod.getPlayer().getHealth() < 10) {
-                Optional<Entity> entity = mod.getEntityTracker().getClosestEntity(mod.getPlayer().getPos(), HoglinEntity.class, ZoglinEntity.class);
+                Optional<Entity> entity = mod.getEntityTracker().getClosestEntity(mod.getPlayer().getEntityPos(), HoglinEntity.class, ZoglinEntity.class);
                 if (entity.isPresent()) {
                     double range = SAFE_KEEP_DISTANCE - 1;
                     if (entity.get().squaredDistanceTo(mod.getPlayer()) < range * range && EntityHelper.isAngryAtPlayer(mod, entity.get())) {

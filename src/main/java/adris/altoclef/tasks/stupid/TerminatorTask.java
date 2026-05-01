@@ -86,11 +86,11 @@ public class TerminatorTask extends Task {
     @Override
     protected Task onTick(AltoClef mod) {
 
-        Optional<Entity> closest = mod.getEntityTracker().getClosestEntity(mod.getPlayer().getPos(), toPunk -> shouldPunk(mod, (PlayerEntity) toPunk), PlayerEntity.class);
+        Optional<Entity> closest = mod.getEntityTracker().getClosestEntity(mod.getPlayer().getEntityPos(), toPunk -> shouldPunk(mod, (PlayerEntity) toPunk), PlayerEntity.class);
 
         if (closest.isPresent()) {
-            _closestPlayerLastPos = closest.get().getPos();
-            _closestPlayerLastObservePos = mod.getPlayer().getPos();
+            _closestPlayerLastPos = closest.get().getEntityPos();
+            _closestPlayerLastObservePos = mod.getPlayer().getEntityPos();
         }
 
         if (!isReadyToPunk(mod)) {
@@ -108,7 +108,7 @@ public class TerminatorTask extends Task {
             }
 
             // See if there's anyone nearby.
-            if (mod.getEntityTracker().getClosestEntity(mod.getPlayer().getPos(), entityAccept -> {
+            if (mod.getEntityTracker().getClosestEntity(mod.getPlayer().getEntityPos(), entityAccept -> {
                 if (!shouldPunk(mod, (PlayerEntity) entityAccept)) {
                     return false;
                 }
@@ -157,7 +157,7 @@ public class TerminatorTask extends Task {
                 return _foodTask;
             }
 
-            if (mod.getEntityTracker().getClosestEntity(mod.getPlayer().getPos(), toPunk -> shouldPunk(mod, (PlayerEntity) toPunk), PlayerEntity.class).isPresent()) {
+            if (mod.getEntityTracker().getClosestEntity(mod.getPlayer().getEntityPos(), toPunk -> shouldPunk(mod, (PlayerEntity) toPunk), PlayerEntity.class).isPresent()) {
                 setDebugState("Punking.");
                 return new DoToClosestEntityTask(
                     entity -> {

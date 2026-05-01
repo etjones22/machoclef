@@ -196,13 +196,13 @@ public class BlockTracker extends Tracker {
 
     public Optional<BlockPos> getNearestTracking(Block... blocks) {
         // Add juuust a little, to prevent digging down all the time/bias towards blocks BELOW the player
-        return getNearestTracking(_mod.getPlayer().getPos().add(0, 0.6f, 0), blocks);
+        return getNearestTracking(_mod.getPlayer().getEntityPos().add(0, 0.6f, 0), blocks);
     }
     public Optional<BlockPos> getNearestTracking(Vec3d pos, Block... blocks) {
         return getNearestTracking(pos, p -> true, blocks);
     }
     public Optional<BlockPos> getNearestTracking(Predicate<BlockPos> isValidTest, Block... blocks) {
-        return getNearestTracking(_mod.getPlayer().getPos(), isValidTest, blocks);
+        return getNearestTracking(_mod.getPlayer().getEntityPos(), isValidTest, blocks);
     }
 
     /**
@@ -368,7 +368,7 @@ public class BlockTracker extends Tracker {
                 }
 
                 // Purge if we have too many blocks tracked at once.
-                currentCache().smartPurge(_mod, _mod.getPlayer().getPos());
+                currentCache().smartPurge(_mod, _mod.getPlayer().getEntityPos());
             }
         }
     }

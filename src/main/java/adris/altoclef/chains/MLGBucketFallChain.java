@@ -10,6 +10,7 @@ import adris.altoclef.util.helpers.LookHelper;
 import baritone.api.utils.Rotation;
 import baritone.api.utils.input.Input;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -51,7 +52,7 @@ public class MLGBucketFallChain extends SingleTaskChain implements ITaskOverride
                 if (_lastMLG != null) {
                     BlockPos placed = _lastMLG.getWaterPlacedPos();
                     //Debug.logInternal("PLACED: " + placed);
-                    if (placed != null && placed.isWithinDistance(mod.getPlayer().getPos(), 5.5)) {
+                    if (placed != null && placed.isWithinDistance(mod.getPlayer().getEntityPos(), 5.5)) {
                         BlockPos toInteract = placed;
                         // Allow looking at fluids
                         mod.getBehaviour().push();
@@ -87,7 +88,7 @@ public class MLGBucketFallChain extends SingleTaskChain implements ITaskOverride
             _lastMLG = null;
         }
         if (mod.getPlayer().hasStatusEffect(StatusEffects.LEVITATION) &&
-                !mod.getPlayer().getItemCooldownManager().isCoolingDown(Items.CHORUS_FRUIT) &&
+                !mod.getPlayer().getItemCooldownManager().isCoolingDown(new ItemStack(Items.CHORUS_FRUIT)) &&
                 mod.getPlayer().getActiveStatusEffects().get(StatusEffects.LEVITATION).getDuration() <= 70 &&
                 mod.getItemStorage().hasItemInventoryOnly(Items.CHORUS_FRUIT) &&
                 !mod.getItemStorage().hasItemInventoryOnly(Items.WATER_BUCKET)) {

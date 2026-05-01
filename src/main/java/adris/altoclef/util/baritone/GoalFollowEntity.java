@@ -18,15 +18,15 @@ public class GoalFollowEntity implements Goal {
     @Override
     public boolean isInGoal(int x, int y, int z) {
         BlockPos p = new BlockPos(x, y, z);
-        return _entity.getBlockPos().equals(p) || p.isWithinDistance(_entity.getPos(), _closeEnoughDistance);
+        return _entity.getBlockPos().equals(p) || p.isWithinDistance(_entity.getEntityPos(), _closeEnoughDistance);
     }
 
     @Override
     public double heuristic(int x, int y, int z) {
         //synchronized (BaritoneHelper.MINECRAFT_LOCK) {
-        double xDiff = x - _entity.getPos().getX();
+        double xDiff = x - _entity.getEntityPos().getX();
         int yDiff = y - _entity.getBlockPos().getY();
-        double zDiff = z - _entity.getPos().getZ();
+        double zDiff = z - _entity.getEntityPos().getZ();
         return GoalBlock.calculate(xDiff, yDiff, zDiff);
         //}
     }

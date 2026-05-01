@@ -8,9 +8,13 @@ import adris.altoclef.util.time.TimerGame;
 import adris.altoclef.util.time.TimerReal;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.*;
+import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
+import net.minecraft.client.network.CookieStorage;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
+
+import java.util.Map;
 
 public class DeathMenuChain extends TaskChain {
 
@@ -106,7 +110,7 @@ public class DeathMenuChain extends TaskChain {
                     Debug.logWarning("Failed to re-connect to server, no server entry cached.");
                 } else {
                     MinecraftClient client = MinecraftClient.getInstance();
-                    ConnectScreen.connect(screen, client, ServerAddress.parse(_prevServerEntry.address), _prevServerEntry);
+                    ConnectScreen.connect(screen, client, ServerAddress.parse(_prevServerEntry.address), _prevServerEntry, false, new CookieStorage(Map.of(), Map.of(), false));
                     //client.setScreen(new ConnectScreen(screen, client, _prevServerEntry));
                 }
             }

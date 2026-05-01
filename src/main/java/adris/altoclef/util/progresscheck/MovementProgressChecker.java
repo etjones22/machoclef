@@ -51,7 +51,7 @@ public class MovementProgressChecker {
             return !_mineChecker.failed();
         } else {
             _mineChecker.reset();
-            _distanceChecker.setProgress(mod.getPlayer().getPos());
+            _distanceChecker.setProgress(mod.getPlayer().getEntityPos());
             return !_distanceChecker.failed();
         }
     }

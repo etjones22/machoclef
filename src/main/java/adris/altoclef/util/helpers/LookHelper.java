@@ -100,7 +100,7 @@ public interface LookHelper {
     }
 
     static Vec3d toVec3d(Rotation rotation) {
-        return RotationUtils.calcVector3dFromRotation(rotation);
+        return RotationUtils.calcLookDirectionFromRotation(rotation);
     }
 
     static BlockHitResult raycast(Entity entity, Vec3d start, Vec3d end, double maxRange) {
@@ -108,7 +108,7 @@ public interface LookHelper {
         if (delta.lengthSquared() > maxRange * maxRange) {
             end = start.add(delta.normalize().multiply(maxRange));
         }
-        return entity.world.raycast(new RaycastContext(start, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, entity));
+        return entity.getEntityWorld().raycast(new RaycastContext(start, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, entity));
     }
 
     static BlockHitResult raycast(Entity entity, Vec3d end, double maxRange) {
@@ -175,7 +175,7 @@ public interface LookHelper {
         HitResult result = MinecraftClient.getInstance().crosshairTarget;
         if (result == null) return false;
         if (result.getType() == HitResult.Type.BLOCK) {
-            return WorldHelper.isInteractableBlock(mod, new BlockPos(result.getPos()));
+            return WorldHelper.isInteractableBlock(mod, BlockPos.ofFloored(result.getPos()));
         } else if (result.getType() == HitResult.Type.ENTITY) {
             if (result instanceof EntityHitResult) {
                 Entity entity = ((EntityHitResult) result).getEntity();

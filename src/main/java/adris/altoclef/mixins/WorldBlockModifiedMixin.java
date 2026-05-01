@@ -19,14 +19,13 @@ public class WorldBlockModifiedMixin {
     }
 
     @Inject(
-            method = "onBlockChanged",
+            method = "onBlockStateChanged(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/BlockState;)V",
             at = @At("HEAD")
     )
-    public void onBlockWasChanged(BlockPos pos, BlockState oldBlock, BlockState newBlock, CallbackInfo ci) {
+    public void onBlockStateChanged(BlockPos pos, BlockState oldBlock, BlockState newBlock, CallbackInfo ci) {
         if (!hasBlock(oldBlock, pos) && hasBlock(newBlock, pos)) {
             BlockPlaceEvent evt = new BlockPlaceEvent(pos, newBlock);
             EventBus.publish(evt);
         }
     }
-    //onBlockChanged
 }

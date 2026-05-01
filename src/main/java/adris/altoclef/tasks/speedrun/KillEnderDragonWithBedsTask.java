@@ -93,7 +93,7 @@ public class KillEnderDragonWithBedsTask extends Task {
                 setDebugState("Going to position for bed cycle...");
                 return _positionTask;
             }
-            if (!WorldHelper.inRangeXZ(WorldHelper.toVec3d(targetStandPosition), mod.getPlayer().getPos(), 1)
+            if (!WorldHelper.inRangeXZ(WorldHelper.toVec3d(targetStandPosition), mod.getPlayer().getEntityPos(), 1)
                     || playerPosition.getY() < targetStandPosition.getY()
             ) {
                 _positionTask = new GetToBlockTask(targetStandPosition);
@@ -136,7 +136,7 @@ public class KillEnderDragonWithBedsTask extends Task {
                 // Wait for dragon head to be close enough to the bed's head...
                 BlockPos bedHead = WorldHelper.getBedHead(mod, bedTargetPosition);
                 assert bedHead != null;
-                Vec3d headPos = dragon.head.getBoundingBox().getCenter(); // dragon.head.getPos();
+                Vec3d headPos = dragon.head.getBoundingBox().getCenter(); // dragon.head.getEntityPos();
                 double dist = headPos.distanceTo(WorldHelper.toVec3d(bedHead));
                 Debug.logMessage("Dist: " + dist);
                 if (dist < BeatMinecraft2Task.getConfig().dragonHeadCloseEnoughClickBedRange) {

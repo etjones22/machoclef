@@ -15,6 +15,7 @@ import adris.altoclef.util.ItemTarget;
 import adris.altoclef.util.RecipeTarget;
 import adris.altoclef.util.SmeltTarget;
 import adris.altoclef.util.time.TimerGame;
+import adris.altoclef.util.helpers.ItemHelper;
 import adris.altoclef.util.helpers.StorageHelper;
 import adris.altoclef.util.helpers.WorldHelper;
 import adris.altoclef.util.slots.FurnaceSlot;
@@ -81,14 +82,12 @@ public class CollectFoodTask extends Task {
         if (count <= 0) return 0;
         for (CookableFoodTarget cookable : COOKABLE_FOODS) {
             if (food.getItem() == cookable.getRaw()) {
-                assert cookable.getCooked().getFoodComponent() != null;
-                return count * cookable.getCooked().getFoodComponent().getHunger();
+                return count * ItemHelper.getFoodHunger(cookable.getCooked());
             }
         }
         // We're just an ordinary item.
-        if (food.getItem().isFood()) {
-            assert food.getItem().getFoodComponent() != null;
-            return count * food.getItem().getFoodComponent().getHunger();
+        if (ItemHelper.isFood(food.getItem())) {
+            return count * ItemHelper.getFoodHunger(food.getItem());
         }
         return 0;
     }
@@ -101,7 +100,7 @@ public class CollectFoodTask extends Task {
             potentialFood += getFoodPotential(food);
         }
         int potentialBread = (int) (mod.getItemStorage().getItemCount(Items.WHEAT) / 3) + mod.getItemStorage().getItemCount(Items.HAY_BLOCK) * 3;
-        potentialFood += Objects.requireNonNull(Items.BREAD.getFoodComponent()).getHunger() * potentialBread;
+        potentialFood += ItemHelper.getFoodHunger(Items.BREAD) * potentialBread;
         // Check smelting
         ScreenHandler screen = mod.getPlayer().currentScreenHandler;
         if (screen instanceof FurnaceScreenHandler) {
@@ -249,7 +248,7 @@ public class CollectFoodTask extends Task {
             Item bestRawFood = null;
             for (CookableFoodTarget cookable : COOKABLE_FOODS) {
                 if (!mod.getEntityTracker().entityFound(cookable.mobToKill)) continue;
-                Optional<Entity> nearest = mod.getEntityTracker().getClosestEntity(mod.getPlayer().getPos(), cookable.mobToKill);
+                Optional<Entity> nearest = mod.getEntityTracker().getClosestEntity(mod.getPlayer().getEntityPos(), cookable.mobToKill);
                 if (nearest.isEmpty()) continue; // ?? This crashed once?
                 if (nearest.get() instanceof LivingEntity livingEntity) {
                     // Peta
@@ -324,15 +323,15 @@ public class CollectFoodTask extends Task {
             if (!WorldHelper.canBreak(mod, blockPos)) return false;
             return accept.test(blockPos);
         };
-        Optional<BlockPos> nearestBlock = mod.getBlockTracker().getNearestTracking(mod.getPlayer().getPos(), acceptPlus, blockToCheck);
+        Optional<BlockPos> nearestBlock = mod.getBlockTracker().getNearestTracking(mod.getPlayer().getEntityPos(), acceptPlus, blockToCheck);
 
-        if (nearestBlock.isPresent() && !nearestBlock.get().isWithinDistance(mod.getPlayer().getPos(), maxRange)) {
+        if (nearestBlock.isPresent() && !nearestBlock.get().isWithinDistance(mod.getPlayer().getEntityPos(), maxRange)) {
             nearestBlock = Optional.empty();
         }
 
         Optional<ItemEntity> nearestDrop = Optional.empty();
         if (mod.getEntityTracker().itemDropped(itemToGrab)) {
-            nearestDrop = mod.getEntityTracker().getClosestItemDrop(mod.getPlayer().getPos(), itemToGrab);
+            nearestDrop = mod.getEntityTracker().getClosestItemDrop(mod.getPlayer().getEntityPos(), itemToGrab);
         }
         boolean spotted = nearestBlock.isPresent() || nearestDrop.isPresent();
         // Collect hay until we have enough.
@@ -361,7 +360,7 @@ public class CollectFoodTask extends Task {
     private Task pickupTaskOrNull(AltoClef mod, Item itemToGrab, double maxRange) {
         Optional<ItemEntity> nearestDrop = Optional.empty();
         if (mod.getEntityTracker().itemDropped(itemToGrab)) {
-            nearestDrop = mod.getEntityTracker().getClosestItemDrop(mod.getPlayer().getPos(), itemToGrab);
+            nearestDrop = mod.getEntityTracker().getClosestItemDrop(mod.getPlayer().getEntityPos(), itemToGrab);
         }
         if (nearestDrop.isPresent()) {
             if (nearestDrop.get().isInRange(mod.getPlayer(), maxRange)) {
@@ -401,8 +400,7 @@ public class CollectFoodTask extends Task {
         }
 
         public int getCookedUnits() {
-            assert getCooked().getFoodComponent() != null;
-            return getCooked().getFoodComponent().getHunger();
+            return ItemHelper.getFoodHunger(getCooked());
         }
 
         public boolean isFish() {

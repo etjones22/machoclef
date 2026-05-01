@@ -87,7 +87,7 @@ public class CollectMilkTask extends ResourceTask {
 
         @Override
         protected Optional<Entity> getEntityTarget(AltoClef mod) {
-            return mod.getEntityTracker().getClosestEntity(mod.getPlayer().getPos(), CowEntity.class);
+            return mod.getEntityTracker().getClosestEntity(mod.getPlayer().getEntityPos(), CowEntity.class);
         }
 
         @Override

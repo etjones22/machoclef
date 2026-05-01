@@ -114,7 +114,7 @@ public class SCP173Task extends Task {
     // but we ALSO consider when the player is ALMOST looking in the general direction and
     // is ROTATING TORWARDS US to try and mitigate the look delay.
     private boolean entityIsLookingInOurGeneralDirection(AltoClef mod, PlayerEntity other) {
-        double lookCloseness = LookHelper.getLookCloseness(other, mod.getPlayer().getPos());
+        double lookCloseness = LookHelper.getLookCloseness(other, mod.getPlayer().getEntityPos());
         double last = _lastLookCloseness.getOrDefault(other, lookCloseness);
         double delta = lookCloseness - last;
         double predicted = lookCloseness + delta * 6;

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import net.minecraft.item.Item;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,9 +42,9 @@ public class ItemDeserializer extends StdDeserializer<Object> {
                 // Translation key (the proper way)
                 String itemKey = p.getText();
                 itemKey = ItemHelper.trimItemName(itemKey);
-                Identifier identifier = new Identifier(itemKey);
-                if (Registry.ITEM.containsId(identifier)) {
-                    item = Registry.ITEM.get(identifier);
+                Identifier identifier = Identifier.of(itemKey);
+                if (Registries.ITEM.containsId(identifier)) {
+                    item = Registries.ITEM.get(identifier);
                 } else {
                     Debug.logWarning("Invalid item name:" + itemKey + " at " + p.getCurrentLocation().toString());
                 }

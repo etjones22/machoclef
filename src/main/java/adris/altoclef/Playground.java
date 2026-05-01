@@ -43,7 +43,7 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
 import net.minecraft.world.chunk.EmptyChunk;
 
 import java.io.*;
@@ -71,8 +71,8 @@ public class Playground {
 
         List<String> notCollected = new ArrayList<>();
 
-        for (Identifier id : Registry.ITEM.getIds()) {
-            Item item = Registry.ITEM.get(id);
+        for (Identifier id : Registries.ITEM.getIds()) {
+            Item item = Registries.ITEM.get(id);
             String name = ItemUtil.trimItemName(item.getTranslationKey());
             allItems.add(name);
             if (!collectable.contains(name)) {
@@ -278,8 +278,8 @@ public class Playground {
                     int total = 0;
                     File f = new File(fname);
                     FileWriter fw = new FileWriter(f);
-                    for (Identifier id : Registry.ITEM.getIds()) {
-                        Item item = Registry.ITEM.get(id);
+                    for (Identifier id : Registries.ITEM.getIds()) {
+                        Item item = Registries.ITEM.get(id);
                         if (!TaskCatalogue.isObtainable(item)) {
                             ++unobtainable;
                             fw.write(item.getTranslationKey() + "\n");

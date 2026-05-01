@@ -4,10 +4,9 @@ import adris.altoclef.AltoClef;
 import adris.altoclef.commandsystem.*;
 import adris.altoclef.tasks.misc.EquipArmorTask;
 import adris.altoclef.util.ItemTarget;
-import net.minecraft.item.ArmorItem;
+import adris.altoclef.util.helpers.ItemHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.tag.ItemTags;
 
 import java.util.Locale;
 
@@ -52,7 +51,7 @@ public class EquipCommand extends Command {
         }
         for(ItemTarget item : items){
             for(Item i : item.getMatches()){
-                if(!(i instanceof ArmorItem)){
+                if(!ItemHelper.isArmor(i)){
                     items=null; // flag items as "bad" if any of the items are not ArmorItems
                     break;
                 }

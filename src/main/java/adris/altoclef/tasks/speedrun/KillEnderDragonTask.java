@@ -293,11 +293,11 @@ public class KillEnderDragonTask extends Task {
                         // Equip weapon
                         AbstractKillEntityTask.equipWeapon(mod);
                         // Look torwards da dragon
-                        Vec3d targetLookPos = head.getPos().add(0, 3, 0);
+                        Vec3d targetLookPos = head.getEntityPos().add(0, 3, 0);
                         Rotation targetRotation = RotationUtils.calcRotationFromVec3d(mod.getClientBaritone().getPlayerContext().playerHead(), targetLookPos, mod.getClientBaritone().getPlayerContext().playerRotations());
                         mod.getClientBaritone().getLookBehavior().updateTarget(targetRotation, true);
                         // Also look towards da dragon
-                        MinecraftClient.getInstance().options.autoJump = false;
+                        MinecraftClient.getInstance().options.getAutoJump().setValue(false);
                         mod.getClientBaritone().getInputOverrideHandler().setInputForceState(Input.MOVE_FORWARD, true);
                         hit(mod);
                     } else {
@@ -314,7 +314,7 @@ public class KillEnderDragonTask extends Task {
                                     // We have sort of a rounded circle here.
                                     if (Math.abs(dx) == 2 && Math.abs(dz) == 2) continue;
                                     BlockPos toCheck = _exitPortalTop.add(dx, bottomYDelta, dz);
-                                    double distSq = toCheck.getSquaredDistance(head.getPos());
+                                    double distSq = toCheck.getSquaredDistance(head.getEntityPos());
                                     if (distSq < closestDist) {
                                         closest = toCheck;
                                         closestDist = distSq;

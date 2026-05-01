@@ -39,7 +39,7 @@ public class CollectSticksTask extends ResourceTask {
     protected Task onResourceTick(AltoClef mod) {
         Optional<BlockPos> nearestBush = mod.getBlockTracker().getNearestTracking(Blocks.DEAD_BUSH);
         // If there's a dead bush within range, go get it
-        if (nearestBush.isPresent() && nearestBush.get().isWithinDistance(mod.getPlayer().getPos(), 20)) {
+        if (nearestBush.isPresent() && nearestBush.get().isWithinDistance(mod.getPlayer().getEntityPos(), 20)) {
             return new MineAndCollectTask(Items.DEAD_BUSH, 999999, new Block[]{Blocks.DEAD_BUSH}, MiningRequirement.HAND);
         }
         // else craft from wood

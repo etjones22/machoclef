@@ -197,7 +197,7 @@ public class PlaceBlockNearbyTask extends Task {
             }
             Hand hand = Hand.MAIN_HAND;
             assert MinecraftClient.getInstance().interactionManager != null;
-            if (MinecraftClient.getInstance().interactionManager.interactBlock(mod.getPlayer(), mod.getWorld(), hand, (BlockHitResult) mouseOver)  == ActionResult.SUCCESS) {
+            if (MinecraftClient.getInstance().interactionManager.interactBlock(mod.getPlayer(), hand, (BlockHitResult) mouseOver)  == ActionResult.SUCCESS) {
                 mod.getPlayer().swingHand(hand);
                 _justPlaced = targetPlace;
                 Debug.logMessage("PRESSED");
@@ -241,7 +241,7 @@ public class PlaceBlockNearbyTask extends Task {
                 continue;
             }
             boolean hasBelow = WorldHelper.isSolid(mod, blockPos.down());
-            double distSq = blockPos.getSquaredDistance(mod.getPlayer().getPos());
+            double distSq = blockPos.getSquaredDistance(mod.getPlayer().getEntityPos());
 
             double score = distSq + (solid ? 4 : 0) + (hasBelow ? 0 : 10) + (inside ? 3 : 0);
 

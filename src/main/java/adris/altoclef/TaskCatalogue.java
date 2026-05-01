@@ -144,7 +144,7 @@ public class TaskCatalogue {
             }
             mine("bamboo", Blocks.BAMBOO, Items.BAMBOO);
             shear("vine", Blocks.VINE, Items.VINE).dontMineIfPresent();
-            shear("grass", Blocks.GRASS, Items.GRASS).dontMineIfPresent();
+            shear("grass", Blocks.SHORT_GRASS, Items.SHORT_GRASS).dontMineIfPresent();
             shear("lily_pad", Blocks.LILY_PAD, Items.LILY_PAD).dontMineIfPresent();
             shear("tall_grass", Blocks.TALL_GRASS, Items.TALL_GRASS).dontMineIfPresent();
             shear("fern", Blocks.FERN, Items.FERN).dontMineIfPresent();
@@ -504,7 +504,7 @@ public class TaskCatalogue {
                 String i = "iron_nugget";
                 shapedRecipe3x3("lantern", Items.LANTERN, 1, i, i, i, i, "torch", i, i, i, i);
                 shapedRecipe3x3("soul_lantern", Items.SOUL_LANTERN, 1, i, i, i, i, "soul_torch", i, i, i, i);
-                shapedRecipe3x3("chain", Items.CHAIN, 1, o, i, o, o, "iron_ingot", o, o, i, o);
+                shapedRecipe3x3("chain", Items.IRON_CHAIN, 1, o, i, o, o, "iron_ingot", o, o, i, o);
             }
             {
                 String c = "chiseled_stone_bricks";

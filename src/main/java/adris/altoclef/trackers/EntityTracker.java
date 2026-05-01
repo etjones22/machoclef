@@ -86,7 +86,7 @@ public class EntityTracker extends Tracker {
     }
 
     public Optional<ItemEntity> getClosestItemDrop(Item... items) {
-        return getClosestItemDrop(_mod.getPlayer().getPos(), items);
+        return getClosestItemDrop(_mod.getPlayer().getEntityPos(), items);
     }
     public Optional<ItemEntity> getClosestItemDrop(Vec3d position, Item... items) {
         return getClosestItemDrop(position, entity -> true, items);
@@ -95,7 +95,7 @@ public class EntityTracker extends Tracker {
         return getClosestItemDrop(position, entity -> true, items);
     }
     public Optional<ItemEntity> getClosestItemDrop(Predicate<ItemEntity> acceptPredicate, Item... items) {
-        return getClosestItemDrop(_mod.getPlayer().getPos(), acceptPredicate, items);
+        return getClosestItemDrop(_mod.getPlayer().getEntityPos(), acceptPredicate, items);
     }
     public Optional<ItemEntity> getClosestItemDrop(Vec3d position, Predicate<ItemEntity> acceptPredicate, Item... items) {
         ensureUpdated();
@@ -126,7 +126,7 @@ public class EntityTracker extends Tracker {
                     if (!entity.getStack().getItem().equals(item)) continue;
                     if (!acceptPredicate.test(entity)) continue;
 
-                    float cost = (float) BaritoneHelper.calculateGenericHeuristic(position, entity.getPos());
+                    float cost = (float) BaritoneHelper.calculateGenericHeuristic(position, entity.getEntityPos());
                     if (cost < minCost) {
                         minCost = cost;
                         closestEntity = entity;
@@ -138,13 +138,13 @@ public class EntityTracker extends Tracker {
     }
 
     public Optional<Entity> getClosestEntity(Class... entityTypes) {
-        return getClosestEntity(_mod.getPlayer().getPos(), entityTypes);
+        return getClosestEntity(_mod.getPlayer().getEntityPos(), entityTypes);
     }
     public Optional<Entity> getClosestEntity(Vec3d position, Class... entityTypes) {
         return this.getClosestEntity(position, (entity) -> true, entityTypes);
     }
     public Optional<Entity> getClosestEntity(Predicate<Entity> acceptPredicate, Class... entityTypes) {
-        return getClosestEntity(_mod.getPlayer().getPos(), acceptPredicate, entityTypes);
+        return getClosestEntity(_mod.getPlayer().getEntityPos(), acceptPredicate, entityTypes);
     }
     public Optional<Entity> getClosestEntity(Vec3d position, Predicate<Entity> acceptPredicate, Class... entityTypes) {
         Entity closestEntity = null;
@@ -382,7 +382,7 @@ public class EntityTracker extends Tracker {
                             continue;
 
                         if (!inGround) {
-                            proj.position = projEntity.getPos();
+                            proj.position = projEntity.getEntityPos();
                             proj.velocity = projEntity.getVelocity();
                             proj.gravity = ProjectileHelper.hasGravity(projEntity) ? ProjectileHelper.ARROW_GRAVITY_ACCEL : 0;
                             proj.projectileType = projEntity.getClass();
@@ -392,7 +392,7 @@ public class EntityTracker extends Tracker {
                 } else if (entity instanceof PlayerEntity player) {
                     String name = player.getName().getString();
                     _playerMap.put(name, player);
-                    _playerLastCoordinates.put(name, player.getPos());
+                    _playerLastCoordinates.put(name, player.getEntityPos());
                 }
             }
         }

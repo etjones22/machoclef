@@ -11,8 +11,8 @@ import adris.altoclef.util.helpers.LookHelper;
 import baritone.api.utils.input.Input;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -168,7 +168,7 @@ public class FoodChain extends SingleTaskChain {
         if (foodLevel < _config.alwaysEatWhenBelowHungerAndPerfectFit && _cachedPerfectFood.isPresent()) {
             int need = 20 - foodLevel;
             Item best = _cachedPerfectFood.get();
-            int fills = (best.getFoodComponent() != null) ? best.getFoodComponent().getHunger() : -1;
+            int fills = ItemHelper.getFoodHunger(best);
             return fills == need;
         }
 
@@ -216,7 +216,7 @@ public class FoodChain extends SingleTaskChain {
         float saturation = player != null? player.getHungerManager().getSaturationLevel() : 20;
         // Get best food item + calculate food total
         for (ItemStack stack : mod.getItemStorage().getItemStacksPlayerInventory(true)) {
-            if (stack.isFood()) {
+            if (ItemHelper.isFood(stack)) {
                 // Ignore protected items
                 if (!ItemHelper.canThrowAwayStack(mod, stack)) continue;
 
@@ -225,17 +225,17 @@ public class FoodChain extends SingleTaskChain {
                     continue;
                 }
 
-                FoodComponent food = stack.getItem().getFoodComponent();
+                FoodComponent food = ItemHelper.getFoodComponent(stack);
 
                 assert food != null;
-                float hungerIfEaten = Math.min(hunger + food.getHunger(), 20);
-                float saturationIfEaten = Math.min(hungerIfEaten, saturation + food.getSaturationModifier());
+                float hungerIfEaten = Math.min(hunger + food.nutrition(), 20);
+                float saturationIfEaten = Math.min(hungerIfEaten, saturation + food.saturation());
                 float gainedSaturation = (saturationIfEaten - saturation);
                 float gainedHunger = (hungerIfEaten - hunger);
                 float hungerNotFilled = 20 - hungerIfEaten;
 
-                float saturationWasted = food.getSaturationModifier() - gainedSaturation;
-                float hungerWasted = food.getHunger() - gainedHunger;
+                float saturationWasted = food.saturation() - gainedSaturation;
+                float hungerWasted = food.nutrition() - gainedHunger;
 
                 boolean prioritizeSaturation = health < _config.prioritizeSaturationWhenBelowHealth;
                 float saturationGoodScore = prioritizeSaturation ? gainedSaturation * _config.foodPickPrioritizeSaturationSaturationMultiplier : gainedSaturation;
@@ -253,7 +253,7 @@ public class FoodChain extends SingleTaskChain {
                     bestFood = stack.getItem();
                 }
 
-                foodTotal += Objects.requireNonNull(stack.getItem().getFoodComponent()).getHunger() * stack.getCount();
+                foodTotal += ItemHelper.getFoodHunger(stack) * stack.getCount();
             }
         }
 

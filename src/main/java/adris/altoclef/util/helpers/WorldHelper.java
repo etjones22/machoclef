@@ -2,7 +2,6 @@ package adris.altoclef.util.helpers;
 
 import adris.altoclef.AltoClef;
 import adris.altoclef.mixins.ClientConnectionAccessor;
-import adris.altoclef.mixins.EntityAccessor;
 import adris.altoclef.util.Dimension;
 import baritone.api.BaritoneAPI;
 import baritone.pathing.movement.CalculationContext;
@@ -19,7 +18,7 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.util.math.*;
-import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
@@ -53,10 +52,10 @@ public interface WorldHelper {
     }
 
     static Vec3i toVec3i(Vec3d pos) {
-        return new Vec3i(pos.getX(), pos.getY(), pos.getZ());
+        return new Vec3i((int) pos.getX(), (int) pos.getY(), (int) pos.getZ());
     }
     static BlockPos toBlockPos(Vec3d pos) {
-        return new BlockPos(pos.getX(), pos.getY(), pos.getZ());
+        return BlockPos.ofFloored(pos);
     }
 
     static boolean isSourceBlock(AltoClef mod, BlockPos pos, boolean onlyAcceptStill) {
@@ -87,20 +86,20 @@ public interface WorldHelper {
         return inRangeXZ(toVec3d(from), toVec3d(to), range);
     }
     static boolean inRangeXZ(Entity entity, Vec3d to, double range) {
-        return inRangeXZ(entity.getPos(), to, range);
+        return inRangeXZ(entity.getEntityPos(), to, range);
     }
     static boolean inRangeXZ(Entity entity, BlockPos to, double range) {
         return inRangeXZ(entity, toVec3d(to), range);
     }
     static boolean inRangeXZ(Entity entity, Entity to, double range) {
-        return inRangeXZ(entity, to.getPos(), range);
+        return inRangeXZ(entity, to.getEntityPos(), range);
     }
 
     static Dimension getCurrentDimension() {
         ClientWorld world = MinecraftClient.getInstance().world;
         if (world == null) return Dimension.OVERWORLD;
-        if (world.getDimension().isUltrawarm()) return Dimension.NETHER;
-        if (world.getDimension().isNatural()) return Dimension.OVERWORLD;
+        if (world.getRegistryKey().equals(net.minecraft.world.World.NETHER)) return Dimension.NETHER;
+        if (world.getRegistryKey().equals(World.OVERWORLD)) return Dimension.OVERWORLD;
         return Dimension.END;
     }
 
@@ -211,7 +210,7 @@ public interface WorldHelper {
     static boolean isInNetherPortal(AltoClef mod) {
         if (mod.getPlayer() == null)
             return false;
-        return ((EntityAccessor)mod.getPlayer()).isInNetherPortal();
+        return mod.getPlayer().portalManager != null && mod.getPlayer().portalManager.isInPortal();
     }
 
     static boolean dangerousToBreakIfRightAbove(AltoClef mod, BlockPos toBreak) {
@@ -294,7 +293,7 @@ public interface WorldHelper {
     }
 
     static boolean isInsidePlayer(AltoClef mod, BlockPos pos) {
-        return pos.isWithinDistance(mod.getPlayer().getPos(), 2);
+        return pos.isWithinDistance(mod.getPlayer().getEntityPos(), 2);
     }
 
     static Iterable<BlockPos> getBlocksTouchingPlayer(AltoClef mod) {
@@ -302,8 +301,8 @@ public interface WorldHelper {
     }
     
     static Iterable<BlockPos> getBlocksTouchingBox(AltoClef mod, Box box) {
-        BlockPos min = new BlockPos(box.minX, box.minY, box.minZ);
-        BlockPos max = new BlockPos(box.maxX, box.maxY, box.maxZ);
+        BlockPos min = BlockPos.ofFloored(box.minX, box.minY, box.minZ);
+        BlockPos max = BlockPos.ofFloored(box.maxX, box.maxY, box.maxZ);
         return scanRegion(mod, min, max);
     }
 
@@ -356,7 +355,7 @@ public interface WorldHelper {
         if (state.getBlock() instanceof SpawnerBlock) {
             BlockEntity be = mod.getWorld().getBlockEntity(pos);
             if (be instanceof MobSpawnerBlockEntity blockEntity) {
-                return blockEntity.getLogic().getRenderedEntity(mod.getWorld());
+                return blockEntity.getLogic().getRenderedEntity(mod.getWorld(), pos);
             }
         }
         return null;

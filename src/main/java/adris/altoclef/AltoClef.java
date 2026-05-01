@@ -26,9 +26,9 @@ import baritone.api.BaritoneAPI;
 import baritone.api.Settings;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -165,7 +165,7 @@ public class AltoClef implements ModInitializer {
         // Tick with the client
         EventBus.subscribe(ClientTickEvent.class, evt -> onClientTick());
         // Render
-        EventBus.subscribe(ClientRenderEvent.class, evt -> onClientRenderOverlay(evt.stack));
+        EventBus.subscribe(ClientRenderEvent.class, evt -> onClientRenderOverlay(evt.context));
 
         // Playground
         Playground.IDLE_TEST_INIT_FUNCTION(this);
@@ -204,8 +204,8 @@ public class AltoClef implements ModInitializer {
         _inputControls.onTickPost();
     }
 
-    private void onClientRenderOverlay(MatrixStack matrixStack) {
-        _commandStatusOverlay.render(this, matrixStack);
+    private void onClientRenderOverlay(DrawContext context) {
+        _commandStatusOverlay.render(this, context);
     }
 
     /// GETTERS AND SETTERS

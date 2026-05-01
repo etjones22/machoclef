@@ -36,7 +36,7 @@ public abstract class GoalRunAwayFromEntities implements Goal {
                 if (entity == null || !entity.isAlive()) continue;
                 double sqDistance;
                 if (_xzOnly) {
-                    sqDistance = entity.getPos().subtract(x, y, z).multiply(1, 0, 1).lengthSquared();
+                    sqDistance = entity.getEntityPos().subtract(x, y, z).multiply(1, 0, 1).lengthSquared();
                 } else {
                     sqDistance = entity.squaredDistanceTo(x, y, z);
                 }

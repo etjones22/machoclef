@@ -71,16 +71,16 @@ public class LocateStrongholdCoordinatesTask extends Task {
                     _cachedEyeDirection = null;
                     _cachedEyeDirection2 = null;
                 } else if (_cachedEyeDirection == null){
-                    _cachedEyeDirection = new LocateStrongholdCoordinatesTask.EyeDirection(_currentThrownEye.getPos());
+                    _cachedEyeDirection = new LocateStrongholdCoordinatesTask.EyeDirection(_currentThrownEye.getEntityPos());
                 } else {
-                    _cachedEyeDirection2 = new LocateStrongholdCoordinatesTask.EyeDirection(_currentThrownEye.getPos());
+                    _cachedEyeDirection2 = new LocateStrongholdCoordinatesTask.EyeDirection(_currentThrownEye.getEntityPos());
                 }
             }
             if (_cachedEyeDirection2 != null) {
-                _cachedEyeDirection2.updateEyePos(_currentThrownEye.getPos());
+                _cachedEyeDirection2.updateEyePos(_currentThrownEye.getEntityPos());
             }
             else if (_cachedEyeDirection != null) {
-                _cachedEyeDirection.updateEyePos(_currentThrownEye.getPos());
+                _cachedEyeDirection.updateEyePos(_currentThrownEye.getEntityPos());
             }
 
             setDebugState("Waiting for eye to travel.");
@@ -102,14 +102,14 @@ public class LocateStrongholdCoordinatesTask extends Task {
 
 
                 _strongholdEstimatePos = calculateIntersection(throwOrigin, throwDelta, throwOrigin2, throwDelta2); // stronghold estimate
-                Debug.logMessage("Stronghold is at " + (int) _strongholdEstimatePos.getX() + ", " + (int) _strongholdEstimatePos.getZ() + " (" + (int) mod.getPlayer().getPos().distanceTo(_strongholdEstimatePos)+ " blocks away)");
+                Debug.logMessage("Stronghold is at " + (int) _strongholdEstimatePos.getX() + ", " + (int) _strongholdEstimatePos.getZ() + " (" + (int) mod.getPlayer().getEntityPos().distanceTo(_strongholdEstimatePos)+ " blocks away)");
             }
         }
 
 
         // Re-throw the eyes after reaching the estimation to get a more accurate estimate of where the stronghold is.
         if (_strongholdEstimatePos != null) {
-            if (((mod.getPlayer().getPos().distanceTo(_strongholdEstimatePos) < EYE_RETHROW_DISTANCE) && WorldHelper.getCurrentDimension() == Dimension.OVERWORLD)){
+            if (((mod.getPlayer().getEntityPos().distanceTo(_strongholdEstimatePos) < EYE_RETHROW_DISTANCE) && WorldHelper.getCurrentDimension() == Dimension.OVERWORLD)){
                 _strongholdEstimatePos = null;
                 _cachedEyeDirection = null;
                 _cachedEyeDirection2 = null;
@@ -131,7 +131,7 @@ public class LocateStrongholdCoordinatesTask extends Task {
             // First get to a proper throwing height
             if (_cachedEyeDirection == null) {
                 setDebugState("Throwing first eye.");
-                if (mod.getPlayer().getPos().y < EYE_THROW_MINIMUM_Y_POSITION) {
+                if (mod.getPlayer().getEntityPos().y < EYE_THROW_MINIMUM_Y_POSITION) {
                     return new GetToYTask(EYE_THROW_MINIMUM_Y_POSITION + 1);
                 }
             } else {
@@ -140,7 +140,7 @@ public class LocateStrongholdCoordinatesTask extends Task {
                 // If first eye thrown, go perpendicular from eye direction until a good distance away
                 if (sqDist < SECOND_EYE_THROW_DISTANCE * SECOND_EYE_THROW_DISTANCE && _cachedEyeDirection != null) {
                     return new GoInDirectionXZTask(_cachedEyeDirection.getOrigin(), _cachedEyeDirection.getDelta().rotateY(MathHelper.PI / 2), 1);
-                } else if (mod.getPlayer().getPos().y < 62) {
+                } else if (mod.getPlayer().getEntityPos().y < 62) {
                     return new GetToYTask(63);
                 }
             }
@@ -149,7 +149,7 @@ public class LocateStrongholdCoordinatesTask extends Task {
                 assert MinecraftClient.getInstance().interactionManager != null;
                 if (_throwTimer.elapsed()) {
                     if (LookHelper.tryAvoidingInteractable(mod)) {
-                        MinecraftClient.getInstance().interactionManager.interactItem(mod.getPlayer(), mod.getWorld(), Hand.MAIN_HAND);
+                        MinecraftClient.getInstance().interactionManager.interactItem(mod.getPlayer(), Hand.MAIN_HAND);
                         //MinecraftClient.getInstance().options.keyUse.setPressed(true);
                         _throwTimer.reset();
                     }
@@ -177,7 +177,7 @@ public class LocateStrongholdCoordinatesTask extends Task {
         if(_strongholdEstimatePos==null){
             return Optional.empty();
         }
-        return Optional.of(new BlockPos(_strongholdEstimatePos));
+        return Optional.of(BlockPos.ofFloored(_strongholdEstimatePos));
     }
 
     @Override

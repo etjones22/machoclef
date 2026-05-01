@@ -97,12 +97,12 @@ public class PlaceSignTask extends Task {
                 }
 
                 // Add newline
-                screen.keyPressed(257, 36, 0);
+                screen.keyPressed(new net.minecraft.client.input.KeyInput(257, 36, 0));
                 //Debug.logMessage("NEW LINE ADDED BEFORE: " + c);
             }
             // keycode don't matter
             //int keyCode = java.awt.event.KeyEvent.getExtendedKeyCodeForChar(c);
-            screen.charTyped(c, -1);
+            screen.charTyped(new net.minecraft.client.input.CharInput(c, -1));
             //screen.keyPressed(keyCode, -1, )
         }
         screen.close();

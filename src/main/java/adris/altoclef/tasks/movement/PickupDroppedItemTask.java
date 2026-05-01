@@ -147,11 +147,11 @@ public class PickupDroppedItemTask extends AbstractDoToClosestObjectTask<ItemEnt
             // Assume we'll land down one or two blocks from here. We could do this more advanced but whatever.
             BlockPos p = obj.getBlockPos();
             if (!WorldHelper.isSolid(mod, p.down(3))) {
-                return obj.getPos().subtract(0,2,0);
+                return obj.getEntityPos().subtract(0,2,0);
             }
-            return obj.getPos().subtract(0,1,0);
+            return obj.getEntityPos().subtract(0,1,0);
         }
-        return obj.getPos();
+        return obj.getEntityPos();
     }
 
     @Override
@@ -163,7 +163,7 @@ public class PickupDroppedItemTask extends AbstractDoToClosestObjectTask<ItemEnt
 
     @Override
     protected Vec3d getOriginPos(AltoClef mod) {
-        return mod.getPlayer().getPos();
+        return mod.getPlayer().getEntityPos();
     }
 
     @Override

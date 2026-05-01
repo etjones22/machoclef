@@ -10,6 +10,7 @@ import adris.altoclef.util.slots.PlayerSlot;
 import adris.altoclef.util.slots.Slot;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -89,9 +90,12 @@ public class InventorySubTracker extends Tracker {
         if (includeCursor) {
             result.add(StorageHelper.getItemStackInCursorSlot());
         }
-        result.addAll(inv.main);
-        result.addAll(inv.armor);
-        result.addAll(inv.offHand);
+        result.addAll(inv.getMainStacks());
+        result.add(player.getEquippedStack(EquipmentSlot.FEET));
+        result.add(player.getEquippedStack(EquipmentSlot.LEGS));
+        result.add(player.getEquippedStack(EquipmentSlot.CHEST));
+        result.add(player.getEquippedStack(EquipmentSlot.HEAD));
+        result.add(player.getEquippedStack(EquipmentSlot.OFFHAND));
         return result;
     }
 

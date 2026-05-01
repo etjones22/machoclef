@@ -41,7 +41,7 @@ public class TimeoutWanderTask extends Task implements ITaskRequiresGrounded {
                 Blocks.SMALL_DRIPLEAF,
                 Blocks.TALL_GRASS,
                 Blocks.SNOW,
-                Blocks.GRASS
+                Blocks.SHORT_GRASS
         ));
     }
 
@@ -92,7 +92,7 @@ public class TimeoutWanderTask extends Task implements ITaskRequiresGrounded {
 
     @Override
     protected void onStart(AltoClef mod) {
-        _origin = mod.getPlayer().getPos();
+        _origin = mod.getPlayer().getEntityPos();
         _progressChecker.reset();
         _failCounter = 0;
         StorageHelper.closeScreen();
@@ -121,7 +121,7 @@ public class TimeoutWanderTask extends Task implements ITaskRequiresGrounded {
             }
         }
 
-        //_distanceProgressChecker.setProgress(mod.getPlayer().getPos());
+        //_distanceProgressChecker.setProgress(mod.getPlayer().getEntityPos());
         //if (_distanceProgressChecker.failed()) {
         if (!_progressChecker.check(mod)) {
             // We failed at exploring.
@@ -179,8 +179,8 @@ public class TimeoutWanderTask extends Task implements ITaskRequiresGrounded {
             return true;
         }
 
-        if (mod.getPlayer() != null && mod.getPlayer().getPos() != null) {
-            double sqDist = mod.getPlayer().getPos().squaredDistanceTo(_origin);
+        if (mod.getPlayer() != null && mod.getPlayer().getEntityPos() != null) {
+            double sqDist = mod.getPlayer().getEntityPos().squaredDistanceTo(_origin);
             double toWander = _distanceToWander + _wanderDistanceExtension;
             return sqDist > toWander * toWander;
         } else {

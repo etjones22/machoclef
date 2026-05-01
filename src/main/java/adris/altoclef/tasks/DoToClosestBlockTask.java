@@ -63,7 +63,7 @@ public class DoToClosestBlockTask extends AbstractDoToClosestObjectTask<BlockPos
         if (_getOriginPos != null) {
             return _getOriginPos.get();
         }
-        return mod.getPlayer().getPos();
+        return mod.getPlayer().getEntityPos();
     }
 
     @Override

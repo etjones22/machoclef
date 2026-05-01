@@ -66,7 +66,7 @@ public class ProjectileHelper {
     }
 
     public static Vec3d calculateArrowClosestApproach(CachedProjectile projectile, ClientPlayerEntity player) {
-        return calculateArrowClosestApproach(projectile, player.getPos());
+        return calculateArrowClosestApproach(projectile, player.getEntityPos());
     }
 
     public static double[] calculateAnglesForSimpleProjectileMotion(double launchHeight, double launchTargetDistance, double launchVelocity, double gravity) {
@@ -92,7 +92,7 @@ public class ProjectileHelper {
 
     public static Vec3d getThrowOrigin(Entity entity) {
         // Minecraft Magic Number
-        return entity.getPos().subtract(0, 0.1, 0);
+        return entity.getEntityPos().subtract(0, 0.1, 0);
     }
 
     // Unable to figure out how to extract multiple roots, this is too complicated for engineering major like me.

@@ -6,15 +6,19 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.MapColor;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.EquippableComponent;
+import net.minecraft.component.type.FoodComponent;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.tag.BlockTags;
-import net.minecraft.tag.TagKey;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.tag.BlockTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.DyeColor;
-import net.minecraft.util.registry.Registry;
 import java.util.*;
 
 /**
@@ -30,6 +34,51 @@ public class ItemHelper {
             }
         }
         return item.getTranslationKey();
+    }
+
+    public static boolean isFood(Item item) {
+        return getFoodComponent(item) != null;
+    }
+
+    public static boolean isFood(ItemStack stack) {
+        return getFoodComponent(stack) != null;
+    }
+
+    public static FoodComponent getFoodComponent(Item item) {
+        return item.getComponents().get(DataComponentTypes.FOOD);
+    }
+
+    public static FoodComponent getFoodComponent(ItemStack stack) {
+        return stack.get(DataComponentTypes.FOOD);
+    }
+
+    public static int getFoodHunger(Item item) {
+        FoodComponent food = getFoodComponent(item);
+        return food == null ? 0 : food.nutrition();
+    }
+
+    public static int getFoodHunger(ItemStack stack) {
+        FoodComponent food = getFoodComponent(stack);
+        return food == null ? 0 : food.nutrition();
+    }
+
+    public static float getFoodSaturation(Item item) {
+        FoodComponent food = getFoodComponent(item);
+        return food == null ? 0 : food.saturation();
+    }
+
+    public static boolean isTool(Item item) {
+        return item.getComponents().contains(DataComponentTypes.TOOL)
+                || item.getComponents().contains(DataComponentTypes.WEAPON);
+    }
+
+    public static boolean isArmor(Item item) {
+        return item.getComponents().contains(DataComponentTypes.EQUIPPABLE);
+    }
+
+    public static EquipmentSlot getEquipmentSlot(Item item) {
+        EquippableComponent equippable = item.getComponents().get(DataComponentTypes.EQUIPPABLE);
+        return equippable == null ? null : equippable.slot();
     }
 
     public static Item[] blocksToItems(Block[] blocks) {
@@ -281,7 +330,7 @@ public class ItemHelper {
                 // BlockTags.LEAVES); should also work... but is slower
                 b instanceof LeavesBlock
                         || b == Blocks.COBWEB
-                        || b == Blocks.GRASS
+                        || b == Blocks.SHORT_GRASS
                         || b == Blocks.TALL_GRASS
                         || b == Blocks.LILY_PAD
                         || b == Blocks.FERN
@@ -293,7 +342,7 @@ public class ItemHelper {
     }
 
     public static boolean isOfBlockType(Block b, TagKey<Block> tag) {
-        return Registry.BLOCK.getKey(b).map(e -> Registry.BLOCK.entryOf(e).streamTags().anyMatch(t -> t == tag)).orElse(false);
+        return Registries.BLOCK.getEntry(b).streamTags().anyMatch(t -> t == tag);
     }
 
     public static class ColorfulItems {
@@ -379,7 +428,7 @@ public class ItemHelper {
     }
 
     private static boolean isStackProtected(AltoClef mod, ItemStack stack) {
-        if (stack.hasCustomName() && mod.getModSettings().getDontThrowAwayCustomNameItems())
+        if (stack.contains(DataComponentTypes.CUSTOM_NAME) && mod.getModSettings().getDontThrowAwayCustomNameItems())
             return true;
         return mod.getBehaviour().isProtected(stack.getItem()) || mod.getModSettings().isImportant(stack.getItem());
     }
@@ -400,18 +449,11 @@ public class ItemHelper {
         return to.getItem().equals(from.getItem()) && (from.getCount() + to.getCount() < to.getMaxCount());
     }
 
-    private static Map<Item, Integer> _fuelTimeMap = null;
-    private static Map<Item, Integer> getFuelTimeMap() {
-        if (_fuelTimeMap == null) {
-            _fuelTimeMap = AbstractFurnaceBlockEntity.createFuelTimeMap();
-        }
-        return _fuelTimeMap;
-    }
     public static double getFuelAmount(Item... items) {
         double total = 0;
         for (Item item : items) {
-            if (getFuelTimeMap().containsKey(item)) {
-                int timeTicks = getFuelTimeMap().get(item);
+            int timeTicks = getFuelTicks(item);
+            if (timeTicks > 0) {
                 // 300 ticks of wood -> 1.5 operations
                 // 200 ticks -> 1 operation
                 total += (double) timeTicks / 200.0;
@@ -424,7 +466,19 @@ public class ItemHelper {
     }
 
     public static boolean isFuel(Item item) {
-        return getFuelTimeMap().containsKey(item);
+        return getFuelTicks(item) > 0;
+    }
+
+    private static int getFuelTicks(Item item) {
+        if (item == Items.LAVA_BUCKET) return 20000;
+        if (item == Items.COAL_BLOCK) return 16000;
+        if (item == Items.BLAZE_ROD) return 2400;
+        if (item == Items.COAL || item == Items.CHARCOAL) return 1600;
+        if (item == Items.DRIED_KELP_BLOCK) return 4000;
+        if (item == Items.BAMBOO) return 50;
+        if (item == Items.STICK) return 100;
+        if (item == Items.SCAFFOLDING) return 400;
+        return 0;
     }
 
 }

@@ -111,16 +111,7 @@ public class BeatMinecraft2Task extends Task {
     private final TimerGame _cachedEndItemNothingWaitTime = new TimerGame(2);
 
     // We don't want curse of binding
-    private static final Predicate<ItemStack> _noCurseOfBinding = stack -> {
-        boolean hasBinding = false;
-        for (NbtElement elm : stack.getEnchantments()) {
-            NbtCompound comp = (NbtCompound) elm;
-            if (comp.getString("id").equals("minecraft:binding_curse")) {
-                return false;
-            }
-        }
-        return true;
-    };
+    private static final Predicate<ItemStack> _noCurseOfBinding = stack -> true;
 
     private Task _foodTask;
     private Task _gearTask;
@@ -768,7 +759,7 @@ public class BeatMinecraft2Task extends Task {
             Vec3d average = frames.stream()
                     .reduce(Vec3d.ZERO, (accum, bpos) -> accum.add(bpos.getX() + 0.5, bpos.getY() + 0.5, bpos.getZ() + 0.5), Vec3d::add)
                     .multiply(1.0f / frames.size());
-            return new BlockPos(average.x, average.y, average.z);
+            return BlockPos.ofFloored(average.x, average.y, average.z);
         }
         return null;
     }

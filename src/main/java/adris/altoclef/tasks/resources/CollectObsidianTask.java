@@ -106,7 +106,7 @@ public class CollectObsidianTask extends ResourceTask {
         }
 
         Predicate<BlockPos> goodObsidian = (blockPos ->
-                blockPos.isWithinDistance(mod.getPlayer().getPos(), 800)
+                blockPos.isWithinDistance(mod.getPlayer().getEntityPos(), 800)
                 && WorldHelper.canBreak(mod, blockPos)
         );
 
@@ -127,7 +127,7 @@ public class CollectObsidianTask extends ResourceTask {
         if (/*obsidianNearby || */mod.getBlockTracker().anyFound(goodObsidian, Blocks.OBSIDIAN) || mod.getEntityTracker().itemDropped(Items.OBSIDIAN)) {
             /*
             // Clear nearby water
-            BlockPos nearestObby = mod.getBlockTracker().getNearestTracking(mod.getPlayer().getPos(), Blocks.OBSIDIAN);
+            BlockPos nearestObby = mod.getBlockTracker().getNearestTracking(mod.getPlayer().getEntityPos(), Blocks.OBSIDIAN);
             if (nearestObby != null) {
                 BlockPos nearestWater = mod.getBlockTracker().getNearestTracking(WorldWorldHelper.toVec3d(nearestObby), blockPos -> !WorldUtil.isSourceBlock(mod, blockPos, true), Blocks.WATER);
 
@@ -144,7 +144,7 @@ public class CollectObsidianTask extends ResourceTask {
             return new MineAndCollectTask(new ItemTarget(Items.OBSIDIAN, _count), new Block[]{Blocks.OBSIDIAN}, MiningRequirement.DIAMOND);
         }
 
-        if (!mod.getWorld().getDimension().isUltrawarm()) {
+        if (!mod.getWorld().getRegistryKey().equals(net.minecraft.world.World.NETHER)) {
             setDebugState("We can't place water, so we're wandering.");
             return new TimeoutWanderTask();
         }
@@ -163,7 +163,7 @@ public class CollectObsidianTask extends ResourceTask {
         if (_placeObsidianTask != null && !mod.getItemStorage().hasItem(Items.LAVA_BUCKET)) {
             // We've moved sort of far away from our post, and this will STOP running when we grab our lava
             // (which is exactly when we want it to run and no more!
-            if (!_placeObsidianTask.getPos().isWithinDistance(mod.getPlayer().getPos(), 4)) {
+            if (!_placeObsidianTask.getPos().isWithinDistance(mod.getPlayer().getEntityPos(), 4)) {
                 BlockPos goodPos = getGoodObsidianPosition(mod);
                 if (goodPos != null) {
                     Debug.logMessage("(nudged obsidian target closer)");

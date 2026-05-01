@@ -1,13 +1,14 @@
 package adris.altoclef.eventbus.events;
 
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.RenderTickCounter;
 
 public class ClientRenderEvent {
-    public MatrixStack stack;
-    public float tickDelta;
+    public DrawContext context;
+    public RenderTickCounter tickCounter;
 
-    public ClientRenderEvent(MatrixStack stack, float tickDelta) {
-        this.stack = stack;
-        this.tickDelta = tickDelta;
+    public ClientRenderEvent(DrawContext context, RenderTickCounter tickCounter) {
+        this.context = context;
+        this.tickCounter = tickCounter;
     }
 }

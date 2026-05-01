@@ -110,7 +110,7 @@ public class FastTravelTask extends Task {
                 if (!_forceOverworldWalking) {
                     // After walking a bit, the moment we go back into the overworld, walk again.
                     Optional<BlockPos> portalEntrance = mod.getMiscBlockTracker().getLastUsedNetherPortal(Dimension.NETHER);
-                    if (portalEntrance.isPresent() && !portalEntrance.get().isWithinDistance(mod.getPlayer().getPos(), 3)) {
+                    if (portalEntrance.isPresent() && !portalEntrance.get().isWithinDistance(mod.getPlayer().getEntityPos(), 3)) {
                         _forceOverworldWalking = true;
                     }
                 }
