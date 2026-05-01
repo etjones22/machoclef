@@ -21,6 +21,7 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
 
     private final RecipeTarget _target;
     private final CraftGenericManuallyTask _manualFallback;
+    private boolean _usingManualFallback;
 
     public CraftGenericWithRecipeBooksTask(RecipeTarget target) {
         _target = target;
@@ -53,6 +54,11 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
             return new ReceiveCraftingOutputSlotTask(outputSlot, _target.getTargetCount());
         }  // TODO Migrate this back to Craft In Inventory
 
+        if (_usingManualFallback) {
+            setDebugState("Recipe book unavailable, crafting manually.");
+            return _manualFallback;
+        }
+
         // If a material is found in cursor, move it to the inventory.
         ItemStack cursor = StorageHelper.getItemStackInCursorSlot();
 
@@ -84,6 +90,7 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
         if (mod.getSlotHandler().canDoSlotAction()) {
             mod.getSlotHandler().registerSlotAction();
             if (!StorageHelper.instantFillRecipeViaBook(mod, _target.getRecipe(), _target.getOutputItem(), true)) {
+                _usingManualFallback = true;
                 setDebugState("Recipe book unavailable, crafting manually.");
                 return _manualFallback;
             }

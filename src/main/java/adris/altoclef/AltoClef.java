@@ -13,6 +13,7 @@ import adris.altoclef.eventbus.events.SendChatEvent;
 import adris.altoclef.eventbus.events.TitleScreenEntryEvent;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.tasksystem.TaskRunner;
+import adris.altoclef.testharness.GamerTestHarness;
 import adris.altoclef.trackers.*;
 import adris.altoclef.trackers.storage.ContainerSubTracker;
 import adris.altoclef.trackers.storage.ItemStorageTracker;
@@ -77,6 +78,8 @@ public class AltoClef implements ModInitializer {
     private SlotHandler _slotHandler;
     // Butler
     private Butler _butler;
+    // Dev-only automation harness
+    private GamerTestHarness _gamerTestHarness;
 
     // Are we in game (playing in a server/world)
     public static boolean inGame() {
@@ -170,6 +173,8 @@ public class AltoClef implements ModInitializer {
         // Playground
         Playground.IDLE_TEST_INIT_FUNCTION(this);
 
+        _gamerTestHarness = GamerTestHarness.createIfEnabled(this);
+
         // External mod initialization
         runEnqueuedPostInits();
     }
@@ -202,6 +207,10 @@ public class AltoClef implements ModInitializer {
         _messageSender.tick();
 
         _inputControls.onTickPost();
+
+        if (_gamerTestHarness != null) {
+            _gamerTestHarness.tick();
+        }
     }
 
     private void onClientRenderOverlay(DrawContext context) {
