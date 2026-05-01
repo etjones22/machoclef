@@ -374,7 +374,7 @@ public class EntityTracker extends Tracker {
                         boolean inGround = false;
                         // Get projectile "inGround" variable
                         if (entity instanceof PersistentProjectileEntity) {
-                            inGround = ((PersistentProjectileEntityAccessor) entity).isInGround();
+                            inGround = ((PersistentProjectileEntityAccessor) entity).altoclef$isInGround();
                         }
 
                         // Ignore some of the harlmess projectiles

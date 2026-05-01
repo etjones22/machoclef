@@ -127,6 +127,18 @@ function Is-HardFailure($Result) {
     return $true
 }
 
+function Get-NewCrashReport([string]$RunDir, [datetime]$StartedAt) {
+    $crashDir = Join-Path $RunDir "crash-reports"
+    if (-not (Test-Path $crashDir)) {
+        return $null
+    }
+
+    return Get-ChildItem -Path $crashDir -Filter "*.txt" |
+        Where-Object { $_.LastWriteTime -ge $StartedAt } |
+        Sort-Object LastWriteTime -Descending |
+        Select-Object -First 1
+}
+
 $runStamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $workersList = New-Object System.Collections.Generic.List[object]
 
@@ -182,6 +194,7 @@ for ($i = 1; $i -le $Workers; $i++) {
         Stdout = $stdoutPath
         Stderr = $stderrPath
         Process = $process
+        StartedAt = Get-Date
         Result = $null
         Complete = $false
     })
@@ -217,11 +230,20 @@ while ($true) {
         }
 
         if ($worker.Process.HasExited) {
-            if ($result -ne $null) {
+            $crashReport = Get-NewCrashReport $worker.RunDir $worker.StartedAt
+            if ($crashReport -ne $null) {
+                $worker.Result = [pscustomobject]@{
+                    LogPath = if ($result -ne $null) { $result.LogPath } else { "" }
+                    Status = "failure"
+                    Reason = "CRASH_REPORT"
+                    Message = "Worker created crash report: $($crashReport.FullName)"
+                    Raw = ""
+                }
+            } elseif ($result -ne $null -and $result.Status -ne "running") {
                 $worker.Result = $result
             } else {
                 $worker.Result = [pscustomobject]@{
-                    LogPath = ""
+                    LogPath = if ($result -ne $null) { $result.LogPath } else { "" }
                     Status = "failure"
                     Reason = "NO_RESULT"
                     Message = "Worker exited without a harness result."
