@@ -20,9 +20,11 @@ import java.util.Optional;
 public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCraftingGrid {
 
     private final RecipeTarget _target;
+    private final CraftGenericManuallyTask _manualFallback;
 
     public CraftGenericWithRecipeBooksTask(RecipeTarget target) {
         _target = target;
+        _manualFallback = new CraftGenericManuallyTask(target);
     }
 
     @Override
@@ -81,7 +83,10 @@ public class CraftGenericWithRecipeBooksTask extends Task implements ITaskUsesCr
         // Request to fill in a recipe. Just piggy back off of the slot delay system.
         if (mod.getSlotHandler().canDoSlotAction()) {
             mod.getSlotHandler().registerSlotAction();
-            StorageHelper.instantFillRecipeViaBook(mod, _target.getRecipe(), _target.getOutputItem(), true);
+            if (!StorageHelper.instantFillRecipeViaBook(mod, _target.getRecipe(), _target.getOutputItem(), true)) {
+                setDebugState("Recipe book unavailable, crafting manually.");
+                return _manualFallback;
+            }
         }
 
 
