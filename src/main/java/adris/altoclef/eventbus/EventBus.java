@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class EventBus {
 
-    private static boolean _lock;
+    private static int _publishDepth;
 
     private static final HashMap<Class, List<Subscription>> _topics = new HashMap<>();
     private static final List<Pair<Class, Subscription>> _toAdd = new ArrayList<>();
@@ -23,37 +23,50 @@ public class EventBus {
     public static <T> void publish(T event) {
         Class type = event.getClass();
 
-        // Add all subscriptions we need to add
-        for (Pair<Class, Subscription> toAdd : _toAdd) {
-            subscribeInternal(toAdd.getLeft(), toAdd.getRight());
+        if (_publishDepth == 0) {
+            flushQueuedSubscriptions();
         }
-        _toAdd.clear();
 
         if (_topics.containsKey(type)) {
-            List<Subscription> subscribers = _topics.get(type);
+            List<Subscription> subscribers = new ArrayList<>(_topics.get(type));
 
             // Subscriptions can be deleted while they're called
             List<Subscription> toDelete = new ArrayList<>();
 
             // Go through our subscription list. We shouldn't modify the list while we're iterating it.
-            _lock = true;
-            for (Subscription subRaw : subscribers) {
-                Subscription<T> sub;
-                try {
-                    sub = (Subscription<T>) subRaw;
-                    if (sub.shouldDelete()) {
-                        toDelete.add(sub);
-                    } else {
-                        sub.accept(event);
+            _publishDepth++;
+            try {
+                for (Subscription subRaw : subscribers) {
+                    Subscription<T> sub;
+                    try {
+                        sub = (Subscription<T>) subRaw;
+                        if (sub.shouldDelete()) {
+                            toDelete.add(sub);
+                        } else {
+                            sub.accept(event);
+                        }
+                    } catch (ClassCastException e) {
+                        System.err.println("TRIED PUBLISHING MISMAPPED EVENT: " + event);
+                        e.printStackTrace();
                     }
-                } catch (ClassCastException e) {
-                    System.err.println("TRIED PUBLISHING MISMAPPED EVENT: " + event);
-                    e.printStackTrace();
+                }
+            } finally {
+                _publishDepth--;
+                if (!toDelete.isEmpty()) {
+                    _topics.get(type).removeAll(toDelete);
+                }
+                if (_publishDepth == 0) {
+                    flushQueuedSubscriptions();
                 }
             }
-            // Delete all subscriptions
-            _lock = false;
         }
+    }
+
+    private static void flushQueuedSubscriptions() {
+        for (Pair<Class, Subscription> toAdd : _toAdd) {
+            subscribeInternal(toAdd.getLeft(), toAdd.getRight());
+        }
+        _toAdd.clear();
     }
 
     private static <T> void subscribeInternal(Class<T> type, Subscription<T> sub) {
@@ -65,7 +78,7 @@ public class EventBus {
 
     public static <T> Subscription<T> subscribe(Class<T> type, Consumer<T> consumeEvent) {
         Subscription<T> sub = new Subscription<>(consumeEvent);
-        if (_lock) {
+        if (_publishDepth > 0) {
             _toAdd.add(new Pair<>(type, sub));
         } else {
             subscribeInternal(type, sub);

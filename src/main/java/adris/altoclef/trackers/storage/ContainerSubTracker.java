@@ -68,6 +68,14 @@ public class ContainerSubTracker extends Tracker {
             _lastBlockInteraction = block;
         }
     }
+
+    public void rememberContainerInteraction(BlockPos pos) {
+        if (pos == null || _mod.getWorld() == null) {
+            return;
+        }
+        onBlockInteract(pos, _mod.getWorld().getBlockState(pos).getBlock());
+    }
+
     private void onScreenOpenFirstTick(final Screen screen) {
         _containerOpen = screen instanceof FurnaceScreen
                 || screen instanceof GenericContainerScreen
@@ -88,7 +96,7 @@ public class ContainerSubTracker extends Tracker {
         // If we haven't registered interacting with a block, try the currently "looking at" block
         if (_containerOpen && _lastBlockPosInteraction == null && _lastBlockInteraction == null) {
             if (MinecraftClient.getInstance().crosshairTarget instanceof BlockHitResult bhit) {
-                Debug.logWarning("Screen open but no block interaction detected, using the block we're currently looking at.");
+                Debug.logInternal("Screen open but no block interaction detected, using the block we're currently looking at.");
                 _lastBlockPosInteraction = bhit.getBlockPos();
                 _lastBlockInteraction = _mod.getWorld().getBlockState(_lastBlockPosInteraction).getBlock();
             }

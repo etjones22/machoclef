@@ -9,6 +9,7 @@ import adris.altoclef.tasks.speedrun.BeatMinecraft2Task;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.tasksystem.TaskChain;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.AccessibilityOnboardingScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.world.CreateWorldScreen;
 import net.minecraft.client.gui.screen.world.WorldCreator;
@@ -45,6 +46,7 @@ public class GamerTestHarness {
 
     private boolean worldCreateRequested;
     private boolean worldCreateStarted;
+    private boolean accessibilityOnboardingDismissed;
     private int worldCreateScreenTicks;
     private boolean commandStarted;
     private boolean finished;
@@ -128,6 +130,11 @@ public class GamerTestHarness {
     }
 
     private void tickWorldCreation(MinecraftClient client) {
+        if (client.currentScreen instanceof AccessibilityOnboardingScreen screen) {
+            dismissAccessibilityOnboarding(client, screen);
+            return;
+        }
+
         if (!worldCreateRequested && client.currentScreen instanceof TitleScreen) {
             worldCreateRequested = true;
             writeEvent("world_create_screen_open", field("worldName", config.worldName));
@@ -158,6 +165,17 @@ public class GamerTestHarness {
                 fail("WORLD_CREATE_FAILED", e.toString());
             }
         }
+    }
+
+    private void dismissAccessibilityOnboarding(MinecraftClient client, AccessibilityOnboardingScreen screen) {
+        if (!accessibilityOnboardingDismissed) {
+            accessibilityOnboardingDismissed = true;
+            writeEvent("accessibility_onboarding_dismiss", field("title", screen.getTitle().getString()));
+        }
+
+        client.options.setAccessibilityOnboarded();
+        client.options.write();
+        client.setScreen(new TitleScreen());
     }
 
     private void sample() {

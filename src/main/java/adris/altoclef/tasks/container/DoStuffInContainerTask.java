@@ -73,6 +73,9 @@ public abstract class DoStuffInContainerTask extends Task {
         }
 
         if (isContainerOpen(mod)) {
+            if (_cachedContainerPosition != null) {
+                mod.getItemStorage().rememberContainerInteraction(_cachedContainerPosition);
+            }
             return containerSubTask(mod);
         }
 

@@ -234,7 +234,7 @@ public class SmeltInFurnaceTask extends ResourceTask {
                     }
                 }
                 // Pick up
-                return new ClickSlotTask(FurnaceSlot.OUTPUT_SLOT, SlotActionType.PICKUP);
+                return new ClickSlotTask(FurnaceSlot.OUTPUT_SLOT, SlotActionType.QUICK_MOVE);
                 // return new MoveItemToSlotTask(new ItemTarget(output.getItem(), output.getCount()), toMoveTo.get(), mod -> FurnaceSlot.OUTPUT_SLOT);
             }
 

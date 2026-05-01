@@ -1,15 +1,33 @@
 param(
     [int]$MaxMinutes = 360,
     [int]$StallSeconds = 300,
+    [int]$RepeatedWarningLimit = 8,
+    [int]$SampleTicks = 20,
+    [int]$StartDelayTicks = 100,
     [string]$WorldName = "",
     [string]$Seed = "",
+    [string]$RunDir = "",
+    [string]$Command = "gamer",
+    [switch]$AllowTimeout,
     [switch]$NoBuild
 )
 
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..")
-$runDir = Join-Path $repoRoot "run"
+$repoRootPath = $repoRoot.Path
+if ([string]::IsNullOrWhiteSpace($RunDir)) {
+    $RunDir = Join-Path $repoRootPath "run"
+} elseif (-not [System.IO.Path]::IsPathRooted($RunDir)) {
+    $RunDir = Join-Path $repoRootPath $RunDir
+}
+
+$runDir = [System.IO.Path]::GetFullPath($RunDir)
+$gradleRunDir = $runDir
+$repoPrefix = $repoRootPath.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+if ($runDir.StartsWith($repoPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+    $gradleRunDir = $runDir.Substring($repoPrefix.Length)
+}
 $harnessDir = Join-Path $runDir "altoclef-harness"
 $crashDir = Join-Path $runDir "crash-reports"
 $startTime = Get-Date
@@ -31,14 +49,17 @@ $env:ALTOCLEF_GAMER_HARNESS = "true"
 $env:ALTOCLEF_GAMER_HARNESS_CREATE_WORLD = "true"
 $env:ALTOCLEF_GAMER_HARNESS_WORLD_NAME = $WorldName
 $env:ALTOCLEF_GAMER_HARNESS_SEED = $Seed
-$env:ALTOCLEF_GAMER_HARNESS_COMMAND = "gamer"
+$env:ALTOCLEF_GAMER_HARNESS_COMMAND = $Command
+$env:ALTOCLEF_GAMER_HARNESS_START_DELAY_TICKS = [string]$StartDelayTicks
+$env:ALTOCLEF_GAMER_HARNESS_SAMPLE_TICKS = [string]$SampleTicks
 $env:ALTOCLEF_GAMER_HARNESS_STALL_SECONDS = [string]$StallSeconds
 $env:ALTOCLEF_GAMER_HARNESS_MAX_SECONDS = [string]($MaxMinutes * 60)
+$env:ALTOCLEF_GAMER_HARNESS_REPEATED_WARNING_LIMIT = [string]$RepeatedWarningLimit
 $env:ALTOCLEF_GAMER_HARNESS_STOP_CLIENT = "true"
 
 Push-Location $repoRoot
 try {
-    & .\gradlew.bat runClient
+    & .\gradlew.bat "-Paltoclef.runDir=$gradleRunDir" runClient
     $clientExit = $LASTEXITCODE
 } finally {
     Pop-Location
@@ -84,6 +105,9 @@ if ($null -eq $resultLine) {
 }
 
 if ($resultLine.Line -notmatch '"status":"success"') {
+    if ($AllowTimeout -and $resultLine.Line -match '"reason":"TIMEOUT"') {
+        exit 0
+    }
     exit 1
 }
 

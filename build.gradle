@@ -48,6 +48,14 @@ dependencies {
     modImplementation files("../baritone/fabric/build/libs/baritone-fabric-1.17.0.jar")
 }
 
+loom {
+    runs {
+        client {
+            runDir = project.findProperty("altoclef.runDir") ?: "run"
+        }
+    }
+}
+
 processResources {
     inputs.property "version", project.version
 

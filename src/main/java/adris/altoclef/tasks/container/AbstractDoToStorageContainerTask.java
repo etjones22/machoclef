@@ -40,6 +40,7 @@ public abstract class AbstractDoToStorageContainerTask extends Task {
 
         // We're open
         if (_currentContainerType != null && ContainerType.screenHandlerMatches(_currentContainerType)) {
+            mod.getItemStorage().rememberContainerInteraction(targetPos);
 
             // Optional<BlockPos> lastInteracted = mod.getItemStorage().getLastBlockPosInteraction();
             //if (lastInteracted.isPresent() && lastInteracted.get().equals(targetPos)) {

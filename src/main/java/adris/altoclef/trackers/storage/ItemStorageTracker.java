@@ -266,6 +266,10 @@ public class ItemStorageTracker extends Tracker {
         return Optional.ofNullable(_containers.getLastBlockPosInteraction());
     }
 
+    public void rememberContainerInteraction(BlockPos pos) {
+        _containers.rememberContainerInteraction(pos);
+    }
+
     @Override
     protected void updateState() {
         _inventory.updateState();

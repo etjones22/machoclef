@@ -3,6 +3,8 @@ package adris.altoclef.tasks;
 import adris.altoclef.AltoClef;
 import adris.altoclef.Debug;
 import adris.altoclef.TaskCatalogue;
+import adris.altoclef.eventbus.EventBus;
+import adris.altoclef.eventbus.events.BlockInteractEvent;
 import adris.altoclef.tasks.movement.TimeoutWanderTask;
 import adris.altoclef.tasksystem.Task;
 import adris.altoclef.util.ItemTarget;
@@ -18,9 +20,12 @@ import baritone.api.pathing.goals.GoalTwoBlocks;
 import baritone.api.process.ICustomGoalProcess;
 import baritone.api.utils.Rotation;
 import baritone.api.utils.input.Input;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 
 import java.util.Optional;
@@ -241,6 +246,10 @@ public class InteractWithBlockTask extends Task {
         Optional<Rotation> reachable = getCurrentReach();
         if (reachable.isPresent()) {
             LookHelper.lookAt(mod, reachable.get());
+            if (MinecraftClient.getInstance().world != null) {
+                Direction hitSide = _direction == null ? Direction.UP : _direction;
+                EventBus.publish(new BlockInteractEvent(new BlockHitResult(Vec3d.ofCenter(_target), hitSide, _target, false), MinecraftClient.getInstance().world));
+            }
             if (mod.getClientBaritone().getPlayerContext().isLookingAt(_target)) {
                 if (_toUse != null) {
                     mod.getSlotHandler().forceEquipItem(_toUse, false);
